@@ -73,11 +73,17 @@
     <build>
         <plugins>
             <plugin>
+                <!-- mvn compile exec:exec -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.3</version>
                 <configuration>
-                    <mainClass>${main.class}</mainClass>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>${main.class}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
             <plugin>

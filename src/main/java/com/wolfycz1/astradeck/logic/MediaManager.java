@@ -21,6 +21,11 @@ public class MediaManager {
     public MediaManager() {
         this.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "astradeck-temp");
         initializeTemp();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Shutting down JVM, triggering temp cleanup.");
+            clearTemp();
+        }));
     }
 
     private void initializeTemp() {
