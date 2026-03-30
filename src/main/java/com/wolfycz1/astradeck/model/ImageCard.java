@@ -6,7 +6,12 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ImageCard extends Flashcard {
-    private String frontText;
-    private String imageFileName;
-    private String backText;
+    private ImageSide front;
+    private TextCard.Side back;
+
+    @Data
+    public static class ImageSide {
+        private String text;
+        private Media image;
+    }
 }
