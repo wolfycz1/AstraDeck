@@ -3,6 +3,7 @@ package com.wolfycz1.astradeck.storage;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.wolfycz1.astradeck.logic.MediaManager;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.Manifest;
 import com.wolfycz1.astradeck.model.Media;
@@ -60,6 +61,8 @@ public class AstraArchiveHandler {
             }
 
             try (InputStream is = zipFile.getInputStream(deckEntry)) {
+                MediaManager mediaManager = new MediaManager();
+                mediaManager.extractMedia(filePath, manifest);
                 return mapper.readValue(is, Deck.class);
             }
         }
