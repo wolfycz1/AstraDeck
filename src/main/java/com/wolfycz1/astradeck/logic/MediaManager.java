@@ -1,22 +1,28 @@
 package com.wolfycz1.astradeck.logic;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.wolfycz1.astradeck.model.Manifest;
 import com.wolfycz1.astradeck.model.Media;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 @Slf4j
 public class MediaManager {
     private final Path tempDir;
+    private final Map<String, ImageIcon> imageCache = new ConcurrentHashMap<>();
 
     public MediaManager() {
         this.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "astradeck-temp");
@@ -67,8 +73,40 @@ public class MediaManager {
         return tempDir.resolve(fileName).toFile();
     }
 
+    public ImageIcon getImageIcon(Media media, int maxWidth, int maxHeight) {
+        String cacheKey = media.getFileName() + "_" + maxWidth + "x" + maxHeight;
+        if (imageCache.containsKey(cacheKey)) {
+            return imageCache.get(cacheKey);
+        }
+
+        File file = getMediaFile(media);
+        if (!file.exists()) {
+            log.error("Image not found in temp: {}", file.getPath());
+            return new FlatSVGIcon("icons/missing.svg");
+        }
+
+        ImageIcon original = new ImageIcon(file.getAbsolutePath());
+        int originalWidth = original.getIconWidth();
+        int originalHeight = original.getIconHeight();
+
+        ImageIcon imageIcon;
+        if (originalWidth <= maxWidth && originalHeight <= maxHeight) {
+            imageIcon = original;
+        } else {
+            double ratio = Math.min((double) maxWidth / originalWidth, (double) maxHeight / originalHeight);
+            int newWidth = (int) (originalWidth * ratio);
+            int newHeight = (int) (originalHeight * ratio);
+            Image scaled = original.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+            imageIcon = new ImageIcon(scaled);
+        }
+
+        imageCache.put(cacheKey, imageIcon);
+        return imageIcon;
+    }
+
     public void clearTemp() {
         try {
+            imageCache.clear();
             if (Files.exists(tempDir)) {
                 FileUtils.cleanDirectory(tempDir.toFile());
                 log.info("Media temp cleared successfully.");
