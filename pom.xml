@@ -90,6 +90,7 @@
                 <configuration>
                     <executable>java</executable>
                     <arguments>
+                        <argument>--enable-native-access=ALL-UNNAMED</argument>
                         <argument>-classpath</argument>
                         <classpath/>
                         <argument>${main.class}</argument>
