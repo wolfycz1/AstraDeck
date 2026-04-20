@@ -57,11 +57,10 @@ public class StudySessionManager {
     private void loadNextCard() {
         currentState = dueCardsQueue.poll();
         if (currentState != null) {
-            currentCard = deck.getCards().stream()
-                    .filter(c -> c.getId().equals(currentState.getCardId()))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Card content missing for state."));
-
+            currentCard = deck.getCardMap().get(currentState.getCardId());
+            if (currentCard == null) {
+                throw new IllegalStateException("Card content missing for state.");
+            }
             eventBus.post(new NewCardPresentedEvent(currentCard, getRemainingCardsCount()));
         } else {
             eventBus.post(new SessionFinishedEvent(cardsReviewedThisSession));
@@ -80,6 +79,10 @@ public class StudySessionManager {
         }
 
         loadNextCard();
+    }
+
+    public String getDeckTitle() {
+        return deck.getTitle();
     }
 
     public int getRemainingCardsCount() {
