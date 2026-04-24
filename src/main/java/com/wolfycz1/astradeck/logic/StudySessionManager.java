@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus;
 import com.wolfycz1.astradeck.algorithm.ReviewAlgorithm;
 import com.wolfycz1.astradeck.algorithm.ReviewGrade;
 import com.wolfycz1.astradeck.event.NewCardPresentedEvent;
+import com.wolfycz1.astradeck.event.SessionAbortedEvent;
 import com.wolfycz1.astradeck.event.SessionFinishedEvent;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.Flashcard;
@@ -36,7 +37,7 @@ public class StudySessionManager {
 
     public void startSession() {
         Instant now = Instant.now();
-        dueCardsQueue.clear();
+        resetSession();
 
         for (ReviewState state : deck.getReviewData().values()) {
             if (state.getNextReviewDate().isBefore(now)) {
@@ -64,6 +65,7 @@ public class StudySessionManager {
             eventBus.post(new NewCardPresentedEvent(currentCard, getRemainingCardsCount()));
         } else {
             eventBus.post(new SessionFinishedEvent(cardsReviewedThisSession));
+            resetSession();
         }
     }
 
@@ -80,11 +82,24 @@ public class StudySessionManager {
         loadNextCard();
     }
 
+    public void abortSession() {
+        resetSession();
+        eventBus.post(new SessionAbortedEvent());
+    }
+
     public String getDeckTitle() {
         return deck.getTitle();
     }
 
     public int getRemainingCardsCount() {
         return dueCardsQueue.size() + (currentState != null ? 1 : 0);
+    }
+
+    private void resetSession() {
+        dueCardsQueue.clear();
+        currentCard = null;
+        currentState = null;
+        totalCardsDue = 0;
+        cardsReviewedThisSession = 0;
     }
 }

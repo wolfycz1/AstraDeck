@@ -5,6 +5,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.wolfycz1.astradeck.algorithm.ReviewGrade;
 import com.wolfycz1.astradeck.event.NewCardPresentedEvent;
+import com.wolfycz1.astradeck.event.SessionAbortedEvent;
 import com.wolfycz1.astradeck.event.SessionFinishedEvent;
 import com.wolfycz1.astradeck.logic.MediaManager;
 import com.wolfycz1.astradeck.logic.StudySessionManager;
@@ -15,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+@SuppressWarnings("ExtractMethodRecommender")
 public class StudyPanel extends JPanel {
     private final StudySessionManager studySessionManager;
     private final EventBus eventBus;
@@ -40,6 +42,19 @@ public class StudyPanel extends JPanel {
 
         JButton abortButton = new JButton("Abort Session");
         abortButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "abortButton");
+        abortButton.addActionListener(_ -> {
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to abort this study session?\nYour progress so far will be saved.",
+                    "Abort Session",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (choice == JOptionPane.YES_OPTION) {
+                studySessionManager.abortSession();
+            }
+        });
 
         progressBar = new JProgressBar();
         remainingLabel = new JLabel("Remaining: 0");
@@ -123,6 +138,11 @@ public class StudyPanel extends JPanel {
     public void onSessionFinished(SessionFinishedEvent event) {
         JOptionPane.showMessageDialog(this, "Session complete.\n"
                 + event.totalReviewed() + " cards reviewed.", "Done", JOptionPane.INFORMATION_MESSAGE);
+        cleanup();
+    }
+
+    @Subscribe
+    public void onSessionAborted(SessionAbortedEvent event) {
         cleanup();
     }
 
