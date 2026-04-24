@@ -13,7 +13,7 @@ public class Sm2Algorithm implements ReviewAlgorithm {
 
         if (q < 3) {
             state.setRepetitions(0);
-            state.setInterval(1);
+            state.setInterval(0);
         } else {
             int currentReps = state.getRepetitions();
 

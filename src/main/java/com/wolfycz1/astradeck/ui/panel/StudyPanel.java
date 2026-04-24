@@ -108,6 +108,8 @@ public class StudyPanel extends JPanel {
         cardViewPanel.setCard(event.card());
         footerCardLayout.show(footerPanel, STATE_QUESTION);
 
+        currentState = STATE_QUESTION;
+
         int total = studySessionManager.getTotalCardsDue();
         int remaining = event.remainingCards();
         int completed = total - remaining;
@@ -121,6 +123,7 @@ public class StudyPanel extends JPanel {
     public void onSessionFinished(SessionFinishedEvent event) {
         JOptionPane.showMessageDialog(this, "Session complete.\n"
                 + event.totalReviewed() + " cards reviewed.", "Done", JOptionPane.INFORMATION_MESSAGE);
+        cleanup();
     }
 
     private void setupKeybinds() {
@@ -150,5 +153,17 @@ public class StudyPanel extends JPanel {
                 if (currentState.equals(STATE_ANSWER)) processGrade(reviewGrade);
             }
         });
+    }
+
+    private void cleanup() {
+        eventBus.unregister(this);
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        try {
+            eventBus.unregister(this);
+        } catch (IllegalArgumentException _) {}
     }
 }

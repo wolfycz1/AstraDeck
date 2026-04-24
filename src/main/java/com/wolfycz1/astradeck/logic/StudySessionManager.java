@@ -73,8 +73,7 @@ public class StudySessionManager {
         algorithm.processReview(currentState, grade);
         cardsReviewedThisSession++;
 
-        if (grade.getValue() < 3) {
-            currentState.setNextReviewDate(Instant.now());
+        if (!currentState.getNextReviewDate().isAfter(Instant.now())) {
             dueCardsQueue.add(currentState);
         }
 
