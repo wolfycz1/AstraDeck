@@ -36,6 +36,5 @@ public class Deck {
         } else {
             this.cardMap = new HashMap<>();
         }
-
     }
 }

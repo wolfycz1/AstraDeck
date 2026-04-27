@@ -5,8 +5,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.wolfycz1.astradeck.algorithm.ReviewGrade;
 import com.wolfycz1.astradeck.event.NewCardPresentedEvent;
-import com.wolfycz1.astradeck.event.SessionAbortedEvent;
-import com.wolfycz1.astradeck.event.SessionFinishedEvent;
 import com.wolfycz1.astradeck.logic.MediaManager;
 import com.wolfycz1.astradeck.logic.StudySessionManager;
 
@@ -134,18 +132,6 @@ public class StudyPanel extends JPanel {
         remainingLabel.setText("Remaining: " + remaining);
     }
 
-    @Subscribe
-    public void onSessionFinished(SessionFinishedEvent event) {
-        JOptionPane.showMessageDialog(this, "Session complete.\n"
-                + event.totalReviewed() + " cards reviewed.", "Done", JOptionPane.INFORMATION_MESSAGE);
-        cleanup();
-    }
-
-    @Subscribe
-    public void onSessionAborted(SessionAbortedEvent event) {
-        cleanup();
-    }
-
     private void setupKeybinds() {
         InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = this.getActionMap();
@@ -173,10 +159,6 @@ public class StudyPanel extends JPanel {
                 if (currentState.equals(STATE_ANSWER)) processGrade(reviewGrade);
             }
         });
-    }
-
-    private void cleanup() {
-        eventBus.unregister(this);
     }
 
     @Override
