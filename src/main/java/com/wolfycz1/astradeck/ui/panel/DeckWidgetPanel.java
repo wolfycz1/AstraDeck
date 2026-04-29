@@ -2,9 +2,11 @@ package com.wolfycz1.astradeck.ui.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.google.common.eventbus.EventBus;
+import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
 import com.wolfycz1.astradeck.event.RequestEditEvent;
 import com.wolfycz1.astradeck.event.RequestExportEvent;
 import com.wolfycz1.astradeck.event.RequestStudyEvent;
+import com.wolfycz1.astradeck.logic.DeckEditorService;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.ReviewState;
 
@@ -62,9 +64,31 @@ public class DeckWidgetPanel extends JPanel {
         exportButton.addActionListener(_ -> eventBus.post(new RequestExportEvent(deck)));
         actionPanel.add(exportButton);
 
-        JButton deleteButton = new JButton("Delete");
-        deleteButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "deleteButton");
-        deleteButton.addActionListener(_ -> {
+        JPopupMenu popupMenu = new JPopupMenu();
+
+        JButton moreButton = new JButton("More ▾");
+        moreButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        moreButton.addActionListener(_ -> popupMenu.show(moreButton, 0, moreButton.getHeight()));
+
+        JMenuItem resetItem = new JMenuItem("Reset progress");
+        resetItem.addActionListener(_ -> {
+            Window parentWindow = SwingUtilities.getWindowAncestor(this);
+            int confirm = JOptionPane.showConfirmDialog(parentWindow,
+                    "Reset all study progress for '" + deck.getTitle() + "'?\nThis will clear all intervals and cannot be undone.",
+                    "Reset progress",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                DeckEditorService.resetDeckProgress(deck);
+                eventBus.post(new DeckUpdatedEvent(deck));
+            }
+        });
+        popupMenu.add(resetItem);
+        popupMenu.addSeparator();
+
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        deleteItem.putClientProperty(FlatClientProperties.STYLE_CLASS, "deleteItem");
+        deleteItem.addActionListener(_ -> {
             Window parentWindow = SwingUtilities.getWindowAncestor(this);
             int confirm = JOptionPane.showConfirmDialog(parentWindow,
                     "Delete '" + deck.getTitle() + "' from memory?",
@@ -73,7 +97,9 @@ public class DeckWidgetPanel extends JPanel {
                 onDelete.run();
             }
         });
-        actionPanel.add(deleteButton);
+        popupMenu.add(deleteItem);
+
+        actionPanel.add(moreButton);
 
         this.add(actionPanel, BorderLayout.SOUTH);
     }
