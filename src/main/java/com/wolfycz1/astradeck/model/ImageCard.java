@@ -14,4 +14,16 @@ public class ImageCard extends Flashcard {
         private String text;
         private Media image;
     }
+
+    @Override
+    public String getPreviewText() {
+        if (front != null) {
+            if (front.getText() != null && !front.getText().isBlank()) {
+                return front.getText();
+            } else if (front.getImage() != null) {
+                return "[" + front.getImage().originalName() + "]";
+            }
+        }
+        return "[Empty Image Card]";
+    }
 }

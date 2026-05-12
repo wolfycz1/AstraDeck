@@ -37,4 +37,34 @@ public class Deck {
             this.cardMap = new HashMap<>();
         }
     }
+
+    public void addCard(Flashcard card) {
+        this.cardMap.put(card.getId(), card);
+
+        ReviewState reviewState = new ReviewState();
+        reviewState.setCardId(card.getId());
+
+        this.reviewData.put(card.getId(), reviewState);
+        this.updatedAt = Instant.now();
+    }
+
+    public void removeCard(UUID cardId) {
+        this.cardMap.remove(cardId);
+        this.reviewData.remove(cardId);
+        this.updatedAt = Instant.now();
+    }
+
+    public void updateCardContent(Flashcard card) {
+        card.setUpdatedAt(Instant.now());
+        this.updatedAt = Instant.now();
+    }
+
+    public void resetDeckProgress() {
+        this.reviewData.clear();
+        for (Flashcard card : cardMap.values()) {
+            ReviewState reviewState = new ReviewState();
+            reviewState.setCardId(card.getId());
+            this.reviewData.put(card.getId(), reviewState);
+        }
+    }
 }

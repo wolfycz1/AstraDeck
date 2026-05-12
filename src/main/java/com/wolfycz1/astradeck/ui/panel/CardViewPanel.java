@@ -1,24 +1,24 @@
 package com.wolfycz1.astradeck.ui.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.wolfycz1.astradeck.logic.MediaManager;
 import com.wolfycz1.astradeck.model.Flashcard;
 import com.wolfycz1.astradeck.model.ImageCard;
 import com.wolfycz1.astradeck.model.TextCard;
+import com.wolfycz1.astradeck.ui.util.ImageProvider;
 import com.wolfycz1.astradeck.util.Constants;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class CardViewPanel extends JPanel {
-    private final MediaManager mediaManager;
+    private final ImageProvider imageProvider;
 
     private final JLabel frontTextLabel;
     private final JLabel frontImageLabel;
     private final JLabel backTextLabel;
 
-    public CardViewPanel(MediaManager mediaManager) {
-        this.mediaManager = mediaManager;
+    public CardViewPanel(ImageProvider imageProvider) {
+        this.imageProvider = imageProvider;
 
         this.setLayout(new GridBagLayout());
         this.putClientProperty(FlatClientProperties.STYLE_CLASS, "CardViewPanel");
@@ -82,7 +82,7 @@ public class CardViewPanel extends JPanel {
                 frontTextLabel.setText(imageCard.getFront().getText());
             }
             if (imageCard.getFront().getImage() != null) {
-                frontImageLabel.setIcon(mediaManager.getImageIcon(imageCard.getFront().getImage(),
+                frontImageLabel.setIcon(imageProvider.getIcon(imageCard.getFront().getImage(),
                         Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT));
                 frontImageLabel.setVisible(true);
             }

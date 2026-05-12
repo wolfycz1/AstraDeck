@@ -6,7 +6,6 @@ import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
 import com.wolfycz1.astradeck.event.RequestEditEvent;
 import com.wolfycz1.astradeck.event.RequestExportEvent;
 import com.wolfycz1.astradeck.event.RequestStudyEvent;
-import com.wolfycz1.astradeck.logic.DeckEditorService;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.ReviewState;
 
@@ -79,7 +78,7 @@ public class DeckWidgetPanel extends JPanel {
                     JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                DeckEditorService.resetDeckProgress(deck);
+                deck.resetDeckProgress();
                 eventBus.post(new DeckUpdatedEvent(deck));
             }
         });

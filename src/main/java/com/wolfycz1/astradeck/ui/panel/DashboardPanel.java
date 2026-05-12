@@ -3,10 +3,7 @@ package com.wolfycz1.astradeck.ui.panel;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
-import com.wolfycz1.astradeck.event.RequestExportEvent;
-import com.wolfycz1.astradeck.event.SessionAbortedEvent;
-import com.wolfycz1.astradeck.event.SessionFinishedEvent;
+import com.wolfycz1.astradeck.event.*;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.storage.AstraArchiveHandler;
 import com.wolfycz1.astradeck.storage.exceptions.InvalidDeckException;
@@ -23,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@SuppressWarnings("ExtractMethodRecommender")
 public class DashboardPanel extends JPanel {
     private final EventBus eventBus;
     private final AstraArchiveHandler astraArchiveHandler;
@@ -100,10 +96,7 @@ public class DashboardPanel extends JPanel {
 
         JButton newButton = new JButton("New deck");
         newButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
-        newButton.addActionListener(_ -> {
-            Window parentWindow = SwingUtilities.getWindowAncestor(this);
-            JOptionPane.showMessageDialog(parentWindow, "Not yet implemented.", "AstraDeck", JOptionPane.INFORMATION_MESSAGE);
-        });
+        newButton.addActionListener(_ -> newDeck());
         navigationActions.add(newButton);
 
         navigationBar.add(navigationActions, BorderLayout.EAST);
@@ -127,6 +120,20 @@ public class DashboardPanel extends JPanel {
         refreshGrid();
     }
 
+    private void newDeck() {
+        Window parentWindow = SwingUtilities.getWindowAncestor(this);
+        String title = JOptionPane.showInputDialog(parentWindow, "Enter a title for the new deck:",
+                "New Deck", JOptionPane.PLAIN_MESSAGE);
+        if (title != null && !title.trim().isEmpty()) {
+            Deck newDeck = new Deck();
+            newDeck.setTitle(title.trim());
+            loadedDecks.add(newDeck);
+            refreshGrid();
+
+            eventBus.post(new RequestEditEvent(newDeck));
+        }
+    }
+
     @Subscribe
     public void onDeckUpdated(DeckUpdatedEvent event) {
         refreshGrid();
@@ -147,7 +154,9 @@ public class DashboardPanel extends JPanel {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Export deck");
 
-        fileChooser.setSelectedFile(new File(event.deck().getTitle() + ".astra"));
+        String sanitizedTitle = sanitizeFilename(event.deck().getTitle());
+
+        fileChooser.setSelectedFile(new File(sanitizedTitle + ".astra"));
         fileChooser.setFileFilter(new FileNameExtensionFilter("AstraDeck decks (*.astra)", "astra"));
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
 
@@ -188,6 +197,14 @@ public class DashboardPanel extends JPanel {
                         "Export Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private String sanitizeFilename(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            return "Untitled_Deck";
+        }
+
+        return title.replaceAll("[\\\\/:*?\"<>|]", "_");
     }
 
     private void refreshGrid() {

@@ -21,4 +21,6 @@ public abstract class Flashcard {
     private UUID id = UUID.randomUUID();
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();
+
+    public abstract String getPreviewText();
 }

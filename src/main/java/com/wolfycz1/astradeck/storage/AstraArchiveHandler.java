@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.wolfycz1.astradeck.logic.MediaManager;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.Manifest;
 import com.wolfycz1.astradeck.model.Media;
@@ -13,6 +12,7 @@ import com.wolfycz1.astradeck.storage.exceptions.AstraArchiveException;
 import com.wolfycz1.astradeck.storage.exceptions.InvalidDeckException;
 import com.wolfycz1.astradeck.storage.exceptions.MissingMediaException;
 import com.wolfycz1.astradeck.storage.exceptions.UnsupportedVersionException;
+import com.wolfycz1.astradeck.ui.util.ImageProvider;
 import com.wolfycz1.astradeck.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -27,14 +27,16 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class AstraArchiveHandler {
     private final ObjectMapper mapper;
-    private final MediaManager mediaManager;
+    private final MediaStorageService mediaStorageService;
+    private final ImageProvider imageProvider;
 
-    public AstraArchiveHandler(MediaManager mediaManager) {
+    public AstraArchiveHandler(MediaStorageService mediaStorageService, ImageProvider imageProvider) {
         this.mapper = new ObjectMapper();
         this.mapper.registerModule(new JavaTimeModule());
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        this.mediaManager = mediaManager;
+        this.mediaStorageService = mediaStorageService;
+        this.imageProvider = imageProvider;
 
         this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
         this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -74,12 +76,12 @@ public class AstraArchiveHandler {
             }
 
             try (InputStream is = zipFile.getInputStream(deckEntry)) {
-                mediaManager.extractMedia(filePath, manifest);
+                mediaStorageService.extractMedia(filePath, manifest);
 
                 CompletableFuture.runAsync(() -> {
                     log.info("Starting background image scale");
                     for (Media media : manifest.getMediaList()) {
-                        mediaManager.getImageIcon(media, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
+                        imageProvider.getIcon(media, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
                     }
                     log.info("Background image scale cached.");
                 });
@@ -104,7 +106,7 @@ public class AstraArchiveHandler {
             zos.closeEntry();
 
             for (Media media : manifest.getMediaList()) {
-                File tempFile = mediaManager.getMediaFile(media);
+                File tempFile = mediaStorageService.getMediaFile(media);
                 if (tempFile.exists()) {
                     zos.putNextEntry(new ZipEntry(media.getPath()));
 

@@ -13,4 +13,12 @@ public class TextCard extends Flashcard {
     public static class Side {
         private String text;
     }
+
+    @Override
+    public String getPreviewText() {
+        if (front != null && front.getText() != null && !front.getText().isBlank()) {
+            return front.getText();
+        }
+        return "[Empty Text Card]";
+    }
 }

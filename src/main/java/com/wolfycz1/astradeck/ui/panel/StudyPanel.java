@@ -5,8 +5,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.wolfycz1.astradeck.algorithm.ReviewGrade;
 import com.wolfycz1.astradeck.event.NewCardPresentedEvent;
-import com.wolfycz1.astradeck.logic.MediaManager;
 import com.wolfycz1.astradeck.logic.StudySessionManager;
+import com.wolfycz1.astradeck.ui.util.ImageProvider;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +30,7 @@ public class StudyPanel extends JPanel {
     private static final String STATE_ANSWER = "ANSWER";
     private String currentState = STATE_QUESTION;
 
-    public StudyPanel(StudySessionManager studySessionManager, EventBus eventBus, MediaManager mediaManager) {
+    public StudyPanel(StudySessionManager studySessionManager, EventBus eventBus, ImageProvider imageProvider) {
         this.studySessionManager = studySessionManager;
         this.eventBus = eventBus;
         this.eventBus.register(this);
@@ -68,7 +68,7 @@ public class StudyPanel extends JPanel {
         headerPanel.add(remainingLabel, BorderLayout.EAST);
         this.add(headerPanel, BorderLayout.NORTH);
 
-        cardViewPanel = new CardViewPanel(mediaManager);
+        cardViewPanel = new CardViewPanel(imageProvider);
         cardViewPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
