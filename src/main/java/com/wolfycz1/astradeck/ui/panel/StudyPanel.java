@@ -6,6 +6,9 @@ import com.google.common.eventbus.Subscribe;
 import com.wolfycz1.astradeck.algorithm.ReviewGrade;
 import com.wolfycz1.astradeck.event.NewCardPresentedEvent;
 import com.wolfycz1.astradeck.logic.StudySessionManager;
+import com.wolfycz1.astradeck.ui.renderers.FlashcardRenderer;
+import com.wolfycz1.astradeck.ui.renderers.ImageCardRenderer;
+import com.wolfycz1.astradeck.ui.renderers.TextCardRenderer;
 import com.wolfycz1.astradeck.ui.util.ImageProvider;
 
 import javax.swing.*;
@@ -13,6 +16,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 @SuppressWarnings("ExtractMethodRecommender")
 public class StudyPanel extends JPanel {
@@ -68,7 +72,8 @@ public class StudyPanel extends JPanel {
         headerPanel.add(remainingLabel, BorderLayout.EAST);
         this.add(headerPanel, BorderLayout.NORTH);
 
-        cardViewPanel = new CardViewPanel(imageProvider);
+        List<FlashcardRenderer<?>> renderers = List.of(new TextCardRenderer(), new ImageCardRenderer(imageProvider));
+        cardViewPanel = new CardViewPanel(renderers);
         cardViewPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

@@ -6,6 +6,7 @@ import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.Flashcard;
 import com.wolfycz1.astradeck.ui.editors.FlashcardEditor;
+import com.wolfycz1.astradeck.ui.renderers.FlashcardListRenderer;
 
 import javax.swing.*;
 import java.awt.*;

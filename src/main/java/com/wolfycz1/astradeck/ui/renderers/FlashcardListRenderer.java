@@ -1,4 +1,4 @@
-package com.wolfycz1.astradeck.ui.panel;
+package com.wolfycz1.astradeck.ui.renderers;
 
 import com.wolfycz1.astradeck.model.Flashcard;
 
