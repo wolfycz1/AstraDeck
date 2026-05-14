@@ -3,7 +3,8 @@ package com.wolfycz1.astradeck.ui.editors;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.wolfycz1.astradeck.model.ImageCard;
 import com.wolfycz1.astradeck.model.Media;
-import com.wolfycz1.astradeck.model.TextCard;
+import com.wolfycz1.astradeck.model.sides.ImageSide;
+import com.wolfycz1.astradeck.model.sides.TextSide;
 import com.wolfycz1.astradeck.storage.MediaStorageService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -149,11 +150,11 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
 
     @Override
     public void saveTo(ImageCard card) {
-        if (card.getFront() == null) card.setFront(new ImageCard.ImageSide());
+        if (card.getFront() == null) card.setFront(new ImageSide());
         card.getFront().setText(frontText.getText());
         card.getFront().setImage(this.currentMedia);
 
-        if (card.getBack() == null) card.setBack(new TextCard.Side());
+        if (card.getBack() == null) card.setBack(new TextSide());
         card.getBack().setText(backText.getText());
     }
 

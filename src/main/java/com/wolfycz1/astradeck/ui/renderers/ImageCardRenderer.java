@@ -2,7 +2,8 @@ package com.wolfycz1.astradeck.ui.renderers;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.wolfycz1.astradeck.model.ImageCard;
-import com.wolfycz1.astradeck.model.TextCard;
+import com.wolfycz1.astradeck.model.sides.ImageSide;
+import com.wolfycz1.astradeck.model.sides.TextSide;
 import com.wolfycz1.astradeck.ui.util.ImageProvider;
 import com.wolfycz1.astradeck.util.Constants;
 
@@ -31,11 +32,11 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
         JLabel textLabel = new JLabel();
         textLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         textLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "frontTextLabel");
-        Optional.ofNullable(card.getFront()).map(ImageCard.ImageSide::getText).ifPresent(textLabel::setText);
+        Optional.ofNullable(card.getFront()).map(ImageSide::getText).ifPresent(textLabel::setText);
 
         JLabel imageLabel = new JLabel();
         imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        Optional.ofNullable(card.getFront()).map(ImageCard.ImageSide::getImage).ifPresent(image ->
+        Optional.ofNullable(card.getFront()).map(ImageSide::getImage).ifPresent(image ->
                 imageLabel.setIcon(imageProvider.getIcon(image, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT)));
 
         panel.add(Box.createVerticalStrut(10));
@@ -54,7 +55,7 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
         JLabel label = new JLabel();
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.putClientProperty(FlatClientProperties.STYLE_CLASS, "backTextLabel");
-        Optional.ofNullable(card.getBack()).map(TextCard.Side::getText).ifPresent(label::setText);
+        Optional.ofNullable(card.getBack()).map(TextSide::getText).ifPresent(label::setText);
         panel.add(label);
 
         return panel;

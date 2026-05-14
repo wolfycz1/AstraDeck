@@ -1,18 +1,14 @@
 package com.wolfycz1.astradeck.model;
 
+import com.wolfycz1.astradeck.model.sides.TextSide;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class TextCard extends Flashcard {
-    private Side front;
-    private Side back;
-
-    @Data
-    public static class Side {
-        private String text;
-    }
+    private TextSide front;
+    private TextSide back;
 
     @Override
     public String getPreviewText() {

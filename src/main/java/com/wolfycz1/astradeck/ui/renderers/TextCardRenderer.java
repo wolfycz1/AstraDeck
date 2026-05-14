@@ -2,6 +2,7 @@ package com.wolfycz1.astradeck.ui.renderers;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.wolfycz1.astradeck.model.TextCard;
+import com.wolfycz1.astradeck.model.sides.TextSide;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +22,7 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
         JLabel label = new JLabel();
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         label.putClientProperty(FlatClientProperties.STYLE_CLASS, "frontTextLabel");
-        Optional.ofNullable(card.getFront()).map(TextCard.Side::getText).ifPresent(label::setText);
+        Optional.ofNullable(card.getFront()).map(TextSide::getText).ifPresent(label::setText);
         panel.add(label);
 
         return panel;
@@ -35,7 +36,7 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
         JLabel label = new JLabel();
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         label.putClientProperty(FlatClientProperties.STYLE_CLASS, "backTextLabel");
-        Optional.ofNullable(card.getBack()).map(TextCard.Side::getText).ifPresent(label::setText);
+        Optional.ofNullable(card.getBack()).map(TextSide::getText).ifPresent(label::setText);
         panel.add(label);
 
         return panel;

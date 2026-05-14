@@ -1,6 +1,7 @@
 package com.wolfycz1.astradeck.ui.editors;
 
 import com.wolfycz1.astradeck.model.TextCard;
+import com.wolfycz1.astradeck.model.sides.TextSide;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -91,10 +92,10 @@ public class TextCardEditor implements FlashcardEditor<TextCard> {
 
     @Override
     public void saveTo(TextCard card) {
-        if (card.getFront() == null) card.setFront(new TextCard.Side());
+        if (card.getFront() == null) card.setFront(new TextSide());
         card.getFront().setText(frontText.getText());
 
-        if (card.getBack() == null) card.setBack(new TextCard.Side());
+        if (card.getBack() == null) card.setBack(new TextSide());
         card.getBack().setText(backText.getText());
     }
 

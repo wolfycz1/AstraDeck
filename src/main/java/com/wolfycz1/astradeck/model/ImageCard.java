@@ -1,5 +1,7 @@
 package com.wolfycz1.astradeck.model;
 
+import com.wolfycz1.astradeck.model.sides.ImageSide;
+import com.wolfycz1.astradeck.model.sides.TextSide;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -7,13 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ImageCard extends Flashcard {
     private ImageSide front;
-    private TextCard.Side back;
-
-    @Data
-    public static class ImageSide {
-        private String text;
-        private Media image;
-    }
+    private TextSide back;
 
     @Override
     public String getPreviewText() {
