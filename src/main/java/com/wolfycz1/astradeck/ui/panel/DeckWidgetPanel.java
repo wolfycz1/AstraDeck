@@ -2,10 +2,7 @@ package com.wolfycz1.astradeck.ui.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.google.common.eventbus.EventBus;
-import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
-import com.wolfycz1.astradeck.event.RequestEditEvent;
-import com.wolfycz1.astradeck.event.RequestExportEvent;
-import com.wolfycz1.astradeck.event.RequestStudyEvent;
+import com.wolfycz1.astradeck.event.*;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.ReviewState;
 
@@ -15,7 +12,7 @@ import java.time.Instant;
 
 @SuppressWarnings("ExtractMethodRecommender")
 public class DeckWidgetPanel extends JPanel {
-    public DeckWidgetPanel(Deck deck, EventBus eventBus, Runnable onDelete) {
+    public DeckWidgetPanel(Deck deck, EventBus eventBus) {
         this.setLayout(new BorderLayout(15, 15));
         this.putClientProperty(FlatClientProperties.STYLE_CLASS, "DeckWidget");
 
@@ -80,6 +77,7 @@ public class DeckWidgetPanel extends JPanel {
             if (confirm == JOptionPane.YES_OPTION) {
                 deck.resetDeckProgress();
                 eventBus.post(new DeckUpdatedEvent(deck));
+                eventBus.post(new DeckResetEvent(deck.getId(), new ReviewState()));
             }
         });
         popupMenu.add(resetItem);
@@ -93,7 +91,7 @@ public class DeckWidgetPanel extends JPanel {
                     "Delete '" + deck.getTitle() + "' from memory?",
                     "Delete deck", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                onDelete.run();
+                eventBus.post(new DeckDeletedEvent(deck.getId()));
             }
         });
         popupMenu.add(deleteItem);

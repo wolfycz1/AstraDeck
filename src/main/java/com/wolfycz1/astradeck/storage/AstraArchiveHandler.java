@@ -79,9 +79,9 @@ public class AstraArchiveHandler {
                 mediaStorageService.extractMedia(filePath, manifest);
 
                 CompletableFuture.runAsync(() -> {
-                    log.info("Starting background image scale");
+                    log.info("Starting background image proxy preload");
                     for (Media media : manifest.getMediaList()) {
-                        imageProvider.getIcon(media, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
+                        imageProvider.preloadIcon(media, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
                     }
                     log.info("Background image scale cached.");
                 });
@@ -115,7 +115,7 @@ public class AstraArchiveHandler {
                     }
                     zos.closeEntry();
                 } else {
-                    throw new MissingMediaException("Cannot export deck. Missing media file in cache: " + media.getPath());
+                    throw new MissingMediaException("Cannot export deck. Missing original media file: " + media.getPath());
                 }
             }
             log.info("Deck exported to: {}", destination);

@@ -38,12 +38,8 @@ public class Deck {
         }
     }
 
-    public void addCard(Flashcard card) {
+    public void addCard(Flashcard card, ReviewState reviewState) {
         this.cardMap.put(card.getId(), card);
-
-        ReviewState reviewState = new ReviewState();
-        reviewState.setCardId(card.getId());
-
         this.reviewData.put(card.getId(), reviewState);
         this.updatedAt = Instant.now();
     }

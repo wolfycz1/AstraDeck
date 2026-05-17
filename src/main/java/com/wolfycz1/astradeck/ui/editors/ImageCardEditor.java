@@ -6,6 +6,8 @@ import com.wolfycz1.astradeck.model.Media;
 import com.wolfycz1.astradeck.model.sides.ImageSide;
 import com.wolfycz1.astradeck.model.sides.TextSide;
 import com.wolfycz1.astradeck.storage.MediaStorageService;
+import com.wolfycz1.astradeck.ui.util.ImageProvider;
+import com.wolfycz1.astradeck.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -14,6 +16,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class ImageCardEditor implements FlashcardEditor<ImageCard> {
@@ -23,10 +26,12 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
     private Runnable changeListener;
 
     private final MediaStorageService mediaStorageService;
+    private final ImageProvider imageProvider;
     private Media currentMedia;
 
-    public ImageCardEditor(MediaStorageService mediaStorageService) {
+    public ImageCardEditor(MediaStorageService mediaStorageService, ImageProvider imageProvider) {
         this.mediaStorageService = mediaStorageService;
+        this.imageProvider = imageProvider;
 
         panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -91,6 +96,12 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
             File selectedFile = fileChooser.getSelectedFile();
             try {
                 this.currentMedia = mediaStorageService.importLocalImage(selectedFile);
+                CompletableFuture.runAsync(() -> {
+                    log.info("Starting background image scale");
+                    imageProvider.preloadIcon(currentMedia, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
+                    log.info("Background image scale cached.");
+                });
+
                 imagePreview.setText("Attached: " + currentMedia.originalName());
                 notifyChange();
             } catch (Exception e) {

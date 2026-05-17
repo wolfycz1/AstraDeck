@@ -3,12 +3,17 @@ package com.wolfycz1.astradeck.ui.panel;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.google.common.eventbus.EventBus;
 import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
+import com.wolfycz1.astradeck.event.FlashcardDeletedEvent;
+import com.wolfycz1.astradeck.event.FlashcardUpdatedEvent;
+import com.wolfycz1.astradeck.event.ReviewStateUpdatedEvent;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.Flashcard;
+import com.wolfycz1.astradeck.model.ReviewState;
 import com.wolfycz1.astradeck.ui.editors.FlashcardEditor;
 import com.wolfycz1.astradeck.ui.renderers.FlashcardListRenderer;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -25,6 +30,9 @@ public class EditorPanel extends JPanel {
     public static final String VIEW_EMPTY = "EMPTY";
     private boolean isLoading = false;
     private final Map<Class<? extends Flashcard>, FlashcardEditor<?>> registry = new LinkedHashMap<>();
+
+    private final Timer debounceTimer;
+    private Flashcard pendingCard = null;
 
     public EditorPanel(Deck deck, EventBus eventBus, List<FlashcardEditor<?>> registeredEditors) {
         this.deck = deck;
@@ -47,6 +55,9 @@ public class EditorPanel extends JPanel {
             editor.setChangeListener(this::autoSaveCurrentCard);
         }
         cardLayout.show(rightFormPanel, VIEW_EMPTY);
+
+        this.debounceTimer = new Timer(750, _ -> flushPendingSave());
+        this.debounceTimer.setRepeats(false);
 
         this.setLayout(new BorderLayout());
         this.add(createToolbar(), BorderLayout.NORTH);
@@ -72,7 +83,10 @@ public class EditorPanel extends JPanel {
 
         JButton backButton = new JButton("← Dashboard");
         backButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
-        backButton.addActionListener(_ -> eventBus.post(new DeckUpdatedEvent(deck)));
+        backButton.addActionListener(_ -> {
+            flushPendingSave();
+            eventBus.post(new DeckUpdatedEvent(deck));
+        });
         toolbar.add(backButton, BorderLayout.WEST);
 
         JLabel title = new JLabel("Editing " + deck.getTitle(), SwingConstants.CENTER);
@@ -143,6 +157,8 @@ public class EditorPanel extends JPanel {
         cardList.addListSelectionListener(e -> {
             if (e.getValueIsAdjusting()) return;
 
+            flushPendingSave();
+
             isLoading = true;
             try {
                 Flashcard selectedCard = cardList.getSelectedValue();
@@ -173,10 +189,14 @@ public class EditorPanel extends JPanel {
             editor.saveTo(selectedCard);
             deck.updateCardContent(selectedCard);
             cardList.repaint();
+
+            pendingCard = selectedCard;
+            debounceTimer.restart();
         }
     }
 
     private void addNewCard() {
+        flushPendingSave();
         FlashcardEditor<?>[] editors = registry.values().toArray(new FlashcardEditor[0]);
         if (editors.length == 0) {
             JOptionPane.showMessageDialog(this, "No flashcard types are currently installed.");
@@ -195,7 +215,13 @@ public class EditorPanel extends JPanel {
         FlashcardEditor<?> selectedEditor = editors[choice];
         Flashcard newCard = selectedEditor.createNewCard();
 
-        deck.addCard(newCard);
+        ReviewState initialReviewState = new ReviewState();
+        initialReviewState.setCardId(newCard.getId());
+
+        deck.addCard(newCard, initialReviewState);
+
+        eventBus.post(new FlashcardUpdatedEvent(deck.getId(), newCard));
+        eventBus.post(new ReviewStateUpdatedEvent(initialReviewState));
 
         listModel.addElement(newCard);
         cardList.setSelectedValue(newCard, true);
@@ -212,8 +238,23 @@ public class EditorPanel extends JPanel {
                 JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
+            if (selectedCard.equals(pendingCard)) {
+                debounceTimer.stop();
+                pendingCard = null;
+            }
+
             deck.removeCard(selectedCard.getId());
             listModel.removeElement(selectedCard);
+
+            eventBus.post(new FlashcardDeletedEvent(deck.getId(), selectedCard.getId()));
+        }
+    }
+
+    private void flushPendingSave() {
+        if (pendingCard != null) {
+            debounceTimer.stop();
+            eventBus.post(new FlashcardUpdatedEvent(deck.getId(), pendingCard));
+            pendingCard = null;
         }
     }
 }

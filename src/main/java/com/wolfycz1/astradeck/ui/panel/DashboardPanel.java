@@ -28,9 +28,10 @@ public class DashboardPanel extends JPanel {
 
     private final JPanel gridContainer;
 
-    public DashboardPanel(EventBus eventBus, AstraArchiveHandler astraArchiveHandler) {
+    public DashboardPanel(EventBus eventBus, AstraArchiveHandler astraArchiveHandler, List<Deck> initialDecks) {
         this.eventBus = eventBus;
         this.astraArchiveHandler = astraArchiveHandler;
+        this.loadedDecks.addAll(initialDecks);
 
         this.eventBus.register(this);
 
@@ -68,6 +69,7 @@ public class DashboardPanel extends JPanel {
                     Deck importedDeck = astraArchiveHandler.importAstraArchive(selectedFile.toPath());
                     loadedDecks.add(importedDeck);
                     refreshGrid();
+                    eventBus.post(new DeckImportedEvent(importedDeck));
                     log.info("Imported deck: {}", importedDeck.getTitle());
                 } catch (UnsupportedVersionException e) {
                     log.warn("Import failed; unsupported version: {}", e.getMessage());
@@ -130,12 +132,19 @@ public class DashboardPanel extends JPanel {
             loadedDecks.add(newDeck);
             refreshGrid();
 
+            eventBus.post(new DeckUpdatedEvent(newDeck));
             eventBus.post(new RequestEditEvent(newDeck));
         }
     }
 
     @Subscribe
     public void onDeckUpdated(DeckUpdatedEvent event) {
+        refreshGrid();
+    }
+
+    @Subscribe
+    public void onDeckDeleted(DeckDeletedEvent event) {
+        loadedDecks.removeIf(deck -> deck.getId().equals(event.deckId()));
         refreshGrid();
     }
 
@@ -216,10 +225,7 @@ public class DashboardPanel extends JPanel {
             gridContainer.add(emptyLabel);
         } else {
             for (Deck deck : loadedDecks) {
-                gridContainer.add(new DeckWidgetPanel(deck, eventBus, () -> {
-                    loadedDecks.remove(deck);
-                    refreshGrid();
-                }));
+                gridContainer.add(new DeckWidgetPanel(deck, eventBus));
             }
         }
 

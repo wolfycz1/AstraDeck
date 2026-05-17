@@ -3,8 +3,10 @@ package com.wolfycz1.astradeck.ui;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.wolfycz1.astradeck.algorithm.Sm2Algorithm;
+import com.wolfycz1.astradeck.database.DeckRepositoryService;
 import com.wolfycz1.astradeck.event.*;
 import com.wolfycz1.astradeck.logic.StudySessionManager;
+import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.storage.AstraArchiveHandler;
 import com.wolfycz1.astradeck.storage.MediaStorageService;
 import com.wolfycz1.astradeck.ui.editors.FlashcardEditor;
@@ -25,24 +27,27 @@ public class NavigationController {
     private final MediaStorageService mediaStorageService;
     private final ImageProvider imageProvider;
     private final AstraArchiveHandler astraArchiveHandler;
+    private final DeckRepositoryService deckRepositoryService;
 
     private DashboardPanel dashboardPanel;
     private StudyPanel currentStudyPanel;
     private EditorPanel currentEditorPanel;
 
     public NavigationController(EventBus eventBus, MainFrame mainFrame, MediaStorageService mediaStorageService,
-                                ImageProvider imageProvider, AstraArchiveHandler astraArchiveHandler) {
+                                ImageProvider imageProvider, AstraArchiveHandler astraArchiveHandler, DeckRepositoryService deckRepositoryService) {
         this.eventBus = eventBus;
         this.mainFrame = mainFrame;
         this.mediaStorageService = mediaStorageService;
         this.imageProvider = imageProvider;
         this.astraArchiveHandler = astraArchiveHandler;
+        this.deckRepositoryService = deckRepositoryService;
 
         this.eventBus.register(this);
     }
 
     public void start() {
-        this.dashboardPanel = new DashboardPanel(eventBus, astraArchiveHandler);
+        List<Deck> savedDecks = deckRepositoryService.loadAllDecks();
+        this.dashboardPanel = new DashboardPanel(eventBus, astraArchiveHandler, savedDecks);
         mainFrame.setView(MainFrame.VIEW_DASHBOARD, dashboardPanel);
         mainFrame.setVisible(true);
     }
@@ -71,7 +76,8 @@ public class NavigationController {
 
     @Subscribe
     public void onEditorRequest(RequestEditEvent event) {
-        List<FlashcardEditor<?>> registeredEditors = List.of(new TextCardEditor(), new ImageCardEditor(mediaStorageService));
+        List<FlashcardEditor<?>> registeredEditors = List.of(new TextCardEditor(),
+                new ImageCardEditor(mediaStorageService, imageProvider));
         currentEditorPanel = new EditorPanel(event.deck(), eventBus, registeredEditors);
 
         mainFrame.setView(MainFrame.VIEW_EDITOR, currentEditorPanel);

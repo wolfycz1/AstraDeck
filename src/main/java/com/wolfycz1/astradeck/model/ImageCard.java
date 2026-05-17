@@ -5,6 +5,8 @@ import com.wolfycz1.astradeck.model.sides.TextSide;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.stream.Stream;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ImageCard extends Flashcard {
@@ -21,5 +23,13 @@ public class ImageCard extends Flashcard {
             }
         }
         return "[Empty Image Card]";
+    }
+
+    @Override
+    public Stream<Media> getReferencedMedia() {
+        if (front != null && front.getImage() != null) {
+            return Stream.of(front.getImage());
+        }
+        return Stream.empty();
     }
 }

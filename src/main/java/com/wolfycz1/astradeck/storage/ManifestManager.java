@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ManifestManager {
@@ -30,15 +30,11 @@ public class ManifestManager {
                 .orElse(null);
         manifest.setEarliestDueDate(earliestDue);
 
-        Set<Media> media = new HashSet<>();
-        for (Flashcard card : deck.getCards()) {
-            if (card instanceof ImageCard) {
-                media.add(((ImageCard) card).getFront().getImage());
-            }
-        }
+        Set<Media> media = deck.getCards().stream()
+                        .flatMap(Flashcard::getReferencedMedia)
+                        .collect(Collectors.toSet());
         manifest.setMediaList(new ArrayList<>(media));
 
         return manifest;
     }
-
 }

@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus;
 import com.wolfycz1.astradeck.algorithm.ReviewAlgorithm;
 import com.wolfycz1.astradeck.algorithm.ReviewGrade;
 import com.wolfycz1.astradeck.event.NewCardPresentedEvent;
+import com.wolfycz1.astradeck.event.ReviewStateUpdatedEvent;
 import com.wolfycz1.astradeck.event.SessionAbortedEvent;
 import com.wolfycz1.astradeck.event.SessionFinishedEvent;
 import com.wolfycz1.astradeck.model.Deck;
@@ -23,7 +24,7 @@ public class StudySessionManager {
     private final EventBus eventBus;
 
     private final PriorityQueue<ReviewState> dueCardsQueue = new PriorityQueue<>(
-            Comparator.comparing(ReviewState::getNextReviewDate)
+            Comparator.comparing(ReviewState::getNextReviewDate, Comparator.nullsFirst(Comparator.naturalOrder()))
     );
 
     @Getter
@@ -40,7 +41,7 @@ public class StudySessionManager {
         resetSession();
 
         for (ReviewState state : deck.getReviewData().values()) {
-            if (state.getNextReviewDate().isBefore(now)) {
+            if (state.getNextReviewDate() == null || state.getNextReviewDate().isBefore(now)) {
                 dueCardsQueue.add(state);
             }
         }
@@ -74,6 +75,8 @@ public class StudySessionManager {
 
         algorithm.processReview(currentState, grade);
         cardsReviewedThisSession++;
+
+        eventBus.post(new ReviewStateUpdatedEvent(currentState));
 
         if (!currentState.getNextReviewDate().isAfter(Instant.now())) {
             dueCardsQueue.add(currentState);
