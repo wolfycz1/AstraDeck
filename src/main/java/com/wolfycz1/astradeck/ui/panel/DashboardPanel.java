@@ -5,6 +5,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.wolfycz1.astradeck.event.*;
 import com.wolfycz1.astradeck.model.Deck;
+import com.wolfycz1.astradeck.network.RemoteRepositoryService;
 import com.wolfycz1.astradeck.storage.AstraArchiveHandler;
 import com.wolfycz1.astradeck.storage.exceptions.InvalidDeckException;
 import com.wolfycz1.astradeck.storage.exceptions.MissingMediaException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("ExtractMethodRecommender")
 @Slf4j
 public class DashboardPanel extends JPanel {
     private final EventBus eventBus;
@@ -46,6 +48,21 @@ public class DashboardPanel extends JPanel {
         navigationBar.add(logoLabel, BorderLayout.WEST);
 
         JPanel navigationActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+
+        JButton discoverButton = new JButton("Discover");
+        discoverButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        discoverButton.addActionListener(_ -> {
+            JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Avaiable Decks", Dialog.ModalityType.APPLICATION_MODAL);
+            RemoteRepositoryService repositoryService = new RemoteRepositoryService();
+            RepositoryPanel repositoryPanel = new RepositoryPanel(eventBus, astraArchiveHandler, repositoryService, loadedDecks);
+
+            dialog.setContentPane(repositoryPanel);
+            dialog.setSize(800, 600);
+            dialog.setLocationRelativeTo(this);
+            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            dialog.setVisible(true);
+        });
+        navigationActions.add(discoverButton);
 
         JButton importButton = new JButton("Import deck");
         importButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
