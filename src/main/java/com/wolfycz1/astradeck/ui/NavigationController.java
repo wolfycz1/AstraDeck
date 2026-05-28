@@ -84,10 +84,8 @@ public class NavigationController {
     }
 
     @Subscribe
-    public void onDeckUpdated(DeckUpdatedEvent event) {
-        if (currentEditorPanel != null) {
-            returnToDashboard();
-        }
+    public void onReturnToDashboard(ReturnToDashboardEvent event) {
+        returnToDashboard();
     }
 
     private void returnToDashboard() {

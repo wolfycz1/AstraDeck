@@ -2,10 +2,7 @@ package com.wolfycz1.astradeck.ui.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.google.common.eventbus.EventBus;
-import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
-import com.wolfycz1.astradeck.event.FlashcardDeletedEvent;
-import com.wolfycz1.astradeck.event.FlashcardUpdatedEvent;
-import com.wolfycz1.astradeck.event.ReviewStateUpdatedEvent;
+import com.wolfycz1.astradeck.event.*;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.Flashcard;
 import com.wolfycz1.astradeck.model.ReviewState;
@@ -18,6 +15,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+@SuppressWarnings("ExtractMethodRecommender")
 public class EditorPanel extends JPanel {
     private final Deck deck;
     private final EventBus eventBus;
@@ -86,6 +84,7 @@ public class EditorPanel extends JPanel {
         backButton.addActionListener(_ -> {
             flushPendingSave();
             eventBus.post(new DeckUpdatedEvent(deck));
+            eventBus.post(new ReturnToDashboardEvent());
         });
         toolbar.add(backButton, BorderLayout.WEST);
 
@@ -97,7 +96,16 @@ public class EditorPanel extends JPanel {
         settingsButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
         settingsButton.addActionListener(_ -> {
             Window parentWindow = SwingUtilities.getWindowAncestor(this);
-            JOptionPane.showMessageDialog(parentWindow, "Not yet implemented.", "AstraDeck", JOptionPane.INFORMATION_MESSAGE);
+            JDialog dialog = new JDialog(parentWindow, "Deck Settings", Dialog.ModalityType.APPLICATION_MODAL);
+            DeckSettingsPanel deckSettingsPanel = new DeckSettingsPanel(deck, eventBus, dialog);
+
+            dialog.setContentPane(deckSettingsPanel);
+            dialog.setSize(450, 350);
+            dialog.setLocationRelativeTo(this);
+            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            dialog.setVisible(true);
+
+            title.setText("Editing " + deck.getTitle());
         });
         toolbar.add(settingsButton, BorderLayout.EAST);
 

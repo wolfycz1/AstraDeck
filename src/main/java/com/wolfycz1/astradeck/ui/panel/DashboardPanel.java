@@ -138,6 +138,12 @@ public class DashboardPanel extends JPanel {
     }
 
     @Subscribe
+    public void onDeckImported(DeckImportedEvent event) {
+        loadedDecks.add(event.deck());
+        refreshGrid();
+    }
+
+    @Subscribe
     public void onDeckUpdated(DeckUpdatedEvent event) {
         refreshGrid();
     }
