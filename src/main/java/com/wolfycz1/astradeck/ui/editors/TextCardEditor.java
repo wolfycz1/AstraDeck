@@ -8,11 +8,18 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 
+/**
+ * A basic editor panel for editing text-only flashcards
+ * @author wolfycz1
+ */
 public class TextCardEditor implements FlashcardEditor<TextCard> {
     private final JPanel panel;
     private final JTextArea frontText, backText;
     private Runnable changeListener;
 
+    /**
+     * Sets up the editor view and its document listener
+     */
     public TextCardEditor() {
         panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -52,30 +59,51 @@ public class TextCardEditor implements FlashcardEditor<TextCard> {
         backText.getDocument().addDocumentListener(documentListener);
     }
 
+    /** Helper method to run the change listener whenever the text is modified. */
     private void notifyChange() {
         if (changeListener != null) changeListener.run();
     }
 
+    /**
+     * Returns the class type this editor supports
+     * @return {@link TextCard} class
+     */
     @Override
     public Class<TextCard> getSupportedType() {
         return TextCard.class;
     }
 
+    /**
+     * Returns the display name of the editor
+     * @return "Text Card"
+     */
     @Override
     public String getDisplayName() {
         return "Text Card";
     }
 
+    /**
+     * Instantiates a new card of the supported type
+     * @return new {@link TextCard}
+     */
     @Override
     public TextCard createNewCard() {
         return new TextCard();
     }
 
+    /**
+     * Returns the main {@link JPanel} containing the editor
+     * @return main {@link JPanel}
+     */
     @Override
     public JPanel getUI() {
         return panel;
     }
 
+    /**
+     * Populates the editor fields with the card data
+     * @param card the card data
+     */
     @Override
     public void populate(TextCard card) {
         if (card.getFront() != null) {
@@ -90,6 +118,10 @@ public class TextCardEditor implements FlashcardEditor<TextCard> {
         }
     }
 
+    /**
+     * Saves the editor fields to the card
+     * @param card the {@link TextCard} object to save to
+     */
     @Override
     public void saveTo(TextCard card) {
         if (card.getFront() == null) card.setFront(new TextSide());
@@ -99,11 +131,18 @@ public class TextCardEditor implements FlashcardEditor<TextCard> {
         card.getBack().setText(backText.getText());
     }
 
+    /**
+     * Registers a callback on whenever a change is made
+     * @param onChange {@link Runnable} listener
+     */
     @Override
     public void setChangeListener(Runnable onChange) {
         this.changeListener = onChange;
     }
 
+    /**
+     * Puts the cursor in the primary field of the editor
+     */
     @Override
     public void requestFocus() {
         if (frontText != null) {

@@ -5,6 +5,10 @@ import com.wolfycz1.astradeck.event.*;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * The primary application window, uses a card layout to swap main screens
+ * @author wolfycz1
+ */
 public class MainFrame extends JFrame {
     public static final String VIEW_DASHBOARD = "DASHBOARD";
     public static final String VIEW_STUDY = "STUDY";
@@ -27,11 +31,20 @@ public class MainFrame extends JFrame {
         cardLayout.show(mainContainer, VIEW_DASHBOARD);
     }
 
+    /**
+     * Mounts a new panel into the container and displays it
+     * @param viewName name of the panel
+     * @param panel the panel to mount
+     */
     public void setView(String viewName, JPanel panel) {
         mainContainer.add(panel, viewName);
         cardLayout.show(mainContainer, viewName);
     }
 
+    /**
+     * Unmounts a panel from the container
+     * @param panel the panel to unmount
+     */
     public void removeView(JPanel panel) {
         if (panel != null) {
             mainContainer.remove(panel);

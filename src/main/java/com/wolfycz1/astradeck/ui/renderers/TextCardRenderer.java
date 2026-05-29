@@ -8,12 +8,25 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
+/**
+ * Generates the visual UI panel for a text-only flashcard
+ * @author wolfycz1
+ */
 public class TextCardRenderer implements FlashcardRenderer<TextCard> {
+    /**
+     * Returns the class type this renderer supports
+     * @return {@link TextCard} class
+     */
     @Override
     public Class<TextCard> getSupportedType() {
         return TextCard.class;
     }
 
+    /**
+     * Builds the UI panel for the front side of the flashcard
+     * @param card card to build the ui for
+     * @return the {@link JPanel} for the front view
+     */
     @Override
     public JPanel createFrontView(TextCard card) {
         JPanel panel = new JPanel();
@@ -21,13 +34,18 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
 
         JLabel label = new JLabel();
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        label.putClientProperty(FlatClientProperties.STYLE_CLASS, "frontTextLabel");
+        label.putClientProperty(FlatClientProperties.STYLE, "font: +8");
         Optional.ofNullable(card.getFront()).map(TextSide::getText).ifPresent(label::setText);
         panel.add(label);
 
         return panel;
     }
 
+    /**
+     * Builds the UI panel for the back side of the flashcard
+     * @param card card to build the ui for
+     * @return the {@link JPanel} for the back view
+     */
     @Override
     public JPanel createBackView(TextCard card) {
         JPanel panel = new JPanel();
@@ -35,7 +53,7 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
 
         JLabel label = new JLabel();
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        label.putClientProperty(FlatClientProperties.STYLE_CLASS, "backTextLabel");
+        label.putClientProperty(FlatClientProperties.STYLE, "font: +4");
         Optional.ofNullable(card.getBack()).map(TextSide::getText).ifPresent(label::setText);
         panel.add(label);
 

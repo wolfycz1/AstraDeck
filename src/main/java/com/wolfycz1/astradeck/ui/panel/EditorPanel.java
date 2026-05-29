@@ -15,6 +15,10 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * Panel responsible for editing deck's flashcards
+ * @author wolfycz1
+ */
 @SuppressWarnings("ExtractMethodRecommender")
 public class EditorPanel extends JPanel {
     private final Deck deck;
@@ -32,6 +36,11 @@ public class EditorPanel extends JPanel {
     private final Timer debounceTimer;
     private Flashcard pendingCard = null;
 
+    /**
+     * Constructs the editor panel and sets up the editors
+     * @param deck deck to create an editor for
+     * @param registeredEditors list of registered editors
+     */
     public EditorPanel(Deck deck, EventBus eventBus, List<FlashcardEditor<?>> registeredEditors) {
         this.deck = deck;
         this.eventBus = eventBus;
@@ -72,6 +81,10 @@ public class EditorPanel extends JPanel {
         setupListeners();
     }
 
+    /**
+     * Constructs the toolbar with navigation controls
+     * @return the constructed toolbar
+     */
     private JPanel createToolbar() {
         JPanel toolbar = new JPanel(new BorderLayout());
         toolbar.setBorder(BorderFactory.createCompoundBorder(
@@ -80,7 +93,7 @@ public class EditorPanel extends JPanel {
         ));
 
         JButton backButton = new JButton("← Dashboard");
-        backButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        backButton.setFocusable(false);
         backButton.addActionListener(_ -> {
             flushPendingSave();
             eventBus.post(new DeckUpdatedEvent(deck));
@@ -89,11 +102,11 @@ public class EditorPanel extends JPanel {
         toolbar.add(backButton, BorderLayout.WEST);
 
         JLabel title = new JLabel("Editing " + deck.getTitle(), SwingConstants.CENTER);
-        title.putClientProperty(FlatClientProperties.STYLE_CLASS, "titleLabel");
+        title.putClientProperty(FlatClientProperties.STYLE, "font: bold +3");
         toolbar.add(title, BorderLayout.CENTER);
 
         JButton settingsButton = new JButton("⚙ Settings");
-        settingsButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        settingsButton.setFocusable(false);
         settingsButton.addActionListener(_ -> {
             Window parentWindow = SwingUtilities.getWindowAncestor(this);
             JDialog dialog = new JDialog(parentWindow, "Deck Settings", Dialog.ModalityType.APPLICATION_MODAL);
@@ -112,6 +125,10 @@ public class EditorPanel extends JPanel {
         return toolbar;
     }
 
+    /**
+     * Constructs the sidebar with the flashcard list
+     * @return the constructed sidebar
+     */
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel(new BorderLayout(0, 10));
         sidebar.setBorder(BorderFactory.createCompoundBorder(
@@ -119,15 +136,14 @@ public class EditorPanel extends JPanel {
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
-        cardList.putClientProperty(FlatClientProperties.STYLE_CLASS, "cardList");
         cardList.setCellRenderer(new FlashcardListRenderer());
 
         JScrollPane scrollPane = new JScrollPane(cardList);
-        scrollPane.putClientProperty(FlatClientProperties.STYLE_CLASS, "scrollPane");
+        scrollPane.setBorder(null);
         sidebar.add(scrollPane, BorderLayout.CENTER);
 
         JButton addButton = new JButton("+ Add new card");
-        addButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        addButton.setFocusable(false);
         addButton.addActionListener(_ -> addNewCard());
 
         sidebar.add(addButton, BorderLayout.SOUTH);
@@ -135,11 +151,18 @@ public class EditorPanel extends JPanel {
         return sidebar;
     }
 
+    /**
+     * Clears the card list and repopulates it with flashcards
+     */
     private void loadCardsIntoList() {
         listModel.clear();
         listModel.addAll(deck.getCardMap().values());
     }
 
+    /**
+     * Creates a placeholder view when a flashcard isn't selected
+     * @return the constructed placeholder view
+     */
     private JPanel createEmptyStateView() {
         JPanel panel = new JPanel(new GridBagLayout());
         JLabel label = new JLabel("Select a card from the list or add a new one.");
@@ -149,18 +172,26 @@ public class EditorPanel extends JPanel {
         return panel;
     }
 
+    /**
+     * Creates a footer with the delete action button
+     * @return the constructed footer
+     */
     private JPanel createDeleteFooter() {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
         JButton deleteButton = new JButton("Delete Card");
-        deleteButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "deleteButton");
+        deleteButton.setFocusable(false);
+        deleteButton.putClientProperty(FlatClientProperties.STYLE, "background: #d32f2f; foreground: #ffffff; selectionBackground: #b71c1c");
         deleteButton.addActionListener(_ -> deleteSelectedCard());
         footer.add(deleteButton);
 
         return footer;
     }
 
+    /**
+     * Sets up listeners to switch editors on switching flashcards
+     */
     private void setupListeners() {
         cardList.addListSelectionListener(e -> {
             if (e.getValueIsAdjusting()) return;
@@ -184,11 +215,20 @@ public class EditorPanel extends JPanel {
         });
     }
 
+    /**
+     * Retrieves the appropriate editor for a flashcard
+     * @param card the flashcard to get the editor for
+     * @return the editor for the flashcard
+     * @param <T> type of the flashcard
+     */
     @SuppressWarnings("unchecked")
     private <T extends Flashcard> FlashcardEditor<T> getEditorForCard(T card) {
         return (FlashcardEditor<T>) registry.get(card.getClass());
     }
 
+    /**
+     * Extracts data from the form, autosaving it into the model
+     */
     private void autoSaveCurrentCard() {
         if (isLoading) return;
         Flashcard selectedCard = cardList.getSelectedValue();
@@ -203,6 +243,9 @@ public class EditorPanel extends JPanel {
         }
     }
 
+    /**
+     * Prompts for a card type and creates a new flashcard of that type
+     */
     private void addNewCard() {
         flushPendingSave();
         FlashcardEditor<?>[] editors = registry.values().toArray(new FlashcardEditor[0]);
@@ -237,6 +280,9 @@ public class EditorPanel extends JPanel {
         selectedEditor.requestFocus();
     }
 
+    /**
+     * Prompts for confirmation, then deletes the selected flashcard from the deck
+     */
     private void deleteSelectedCard() {
         Flashcard selectedCard = cardList.getSelectedValue();
         if (selectedCard == null) return;
@@ -258,6 +304,9 @@ public class EditorPanel extends JPanel {
         }
     }
 
+    /**
+     * Forces pending autosave to execute immediately
+     */
     private void flushPendingSave() {
         if (pendingCard != null) {
             debounceTimer.stop();

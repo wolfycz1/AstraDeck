@@ -10,6 +10,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.List;
 
+/**
+ * Panel responsible for displaying the front and back views of a flashcard.
+ * @author wolfycz1
+ */
 public class CardViewPanel extends JPanel {
     private final JPanel frontContainer;
     private final JSeparator separator;
@@ -17,13 +21,19 @@ public class CardViewPanel extends JPanel {
 
     private final Map<Class<? extends Flashcard>, FlashcardRenderer<?>> registry = new LinkedHashMap<>();
 
+    /**
+     * Constructs the panel, initializes the UI layout, and populates the renderer registry.
+     * @param renderers List of avaiable renderers
+     */
     public CardViewPanel(List<FlashcardRenderer<?>> renderers) {
         for (FlashcardRenderer<?> renderer : renderers) {
             registry.put(renderer.getSupportedType(), renderer);
         }
 
         this.setLayout(new GridBagLayout());
-        this.putClientProperty(FlatClientProperties.STYLE_CLASS, "CardViewPanel");
+        this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        this.putClientProperty(FlatClientProperties.STYLE, "arc: 16;" +
+                "background: $EditorPane.background;");
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -55,11 +65,22 @@ public class CardViewPanel extends JPanel {
         this.add(Box.createVerticalGlue(), gbc);
     }
 
+    /**
+     * Retrieves the appropriate renderer for the given flashcard type
+     * @param card The flashcard to render
+     * @return The corresponding renderer
+     * @param <T> Type of the flashcard
+     */
     @SuppressWarnings("unchecked")
     private <T extends Flashcard> FlashcardRenderer<T> getRenderer(T card) {
         return (FlashcardRenderer<T>) registry.get(card.getClass());
     }
 
+    /**
+     * Sets the current flashcard to be displayed
+     * Renders front view, hides back view initially
+     * @param card card to be displayed
+     */
     public void setCard(Flashcard card) {
         frontContainer.removeAll();
         backContainer.removeAll();
@@ -78,6 +99,9 @@ public class CardViewPanel extends JPanel {
 
     }
 
+    /**
+     * Reveals the back of the card
+     */
     public void showBack() {
         separator.setVisible(true);
         backContainer.setVisible(true);

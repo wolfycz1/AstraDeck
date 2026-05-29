@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Contains metadata of the deck, used for fast cross-referencing
+ * @author wolfycz1
+ */
 @Data
 public class Manifest {
     private UUID deckId;

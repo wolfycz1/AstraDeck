@@ -16,12 +16,19 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Provider for cached scaled images for the UI
+ * @author wolfycz1
+ */
 @Slf4j
 public class ImageProvider {
     private final MediaStorageService mediaStorageService;
     private final Map<String, ImageIcon> memoryCache;
     private final FlatSVGIcon missingIcon;
 
+    /**
+     * Constructs the LRU cache
+     */
     public ImageProvider(MediaStorageService mediaStorageService) {
         this.mediaStorageService = mediaStorageService;
         this.memoryCache = Collections.synchronizedMap(
@@ -35,15 +42,37 @@ public class ImageProvider {
         this.missingIcon = new FlatSVGIcon("icons/missing.svg");
     }
 
+    /**
+     * Preloads a scaled icon to the cache
+     * @param media image to scale
+     * @param maxWidth max width to scale it to
+     * @param maxHeight max height to scale it to
+     */
     public void preloadIcon(Media media, int maxWidth, int maxHeight) {
         getIcon(media, maxWidth, maxHeight);
     }
 
+    /**
+     * Tries to retrieve the image from the memory cache, trying to load from disk if absent.
+     * If that fails, it falls back to regenerating the image
+     * @param media image to scale
+     * @param maxWidth max width to scale it to
+     * @param maxHeight max height to scale it to
+     * @return the icon
+     */
     public ImageIcon getIcon(Media media, int maxWidth, int maxHeight) {
         String cacheKey = media.name() + "_" + maxWidth + "x" + maxHeight;
         return memoryCache.computeIfAbsent(cacheKey, key -> loadFromDiskOrGenerate(media, key, maxWidth, maxHeight));
     }
 
+    /**
+     * Tries loading the image from disk, if that fails, resorts to regenerating the image.
+     * @param media image to load
+     * @param key the cache key
+     * @param maxWidth max width to scale it to
+     * @param maxHeight max height to scale it to
+     * @return the icon
+     */
     private ImageIcon loadFromDiskOrGenerate(Media media, String key, int maxWidth, int maxHeight) {
         File pngCache = OsPaths.CACHE_DIR.resolve(key + ".png").toFile();
         ImageIcon icon = attempDiskLoad(pngCache);
@@ -56,6 +85,11 @@ public class ImageProvider {
         return generateCacheProxy(media, key, maxWidth, maxHeight);
     }
 
+    /**
+     * Attempts to load a file from the disk
+     * @param cacheFile file to attempt to load
+     * @return the file, or {@code null} if it couldn't be loaded
+     */
     private ImageIcon attempDiskLoad(File cacheFile) {
         if (cacheFile.exists()) {
             try {
@@ -68,6 +102,14 @@ public class ImageProvider {
         return null;
     }
 
+    /**
+     * Tries regenerating the image from the original media, if it can't, it returns the missing image icon
+     * @param media media to load and scale
+     * @param key the cache key
+     * @param maxWidth max width to scale it to
+     * @param maxHeight max height to scale it to
+     * @return the icon
+     */
     private ImageIcon generateCacheProxy(Media media, String key, int maxWidth, int maxHeight) {
         File original = mediaStorageService.getMediaFile(media);
         if (!original.exists()) {
@@ -102,6 +144,7 @@ public class ImageProvider {
         }
     }
 
+    /** Clears all stored images in memory **/
     public void clearMemoryCache() {
         memoryCache.clear();
     }

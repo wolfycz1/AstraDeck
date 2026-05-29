@@ -1,6 +1,5 @@
 package com.wolfycz1.astradeck.ui.panel;
 
-import com.formdev.flatlaf.FlatClientProperties;
 import com.google.common.eventbus.EventBus;
 import com.wolfycz1.astradeck.event.DeckUpdatedEvent;
 import com.wolfycz1.astradeck.model.Deck;
@@ -12,6 +11,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Panel providing a form for editting deck metadata
+ * @author wolfycz1
+ */
 public class DeckSettingsPanel extends JPanel {
     private final Deck deck;
     private final EventBus eventBus;
@@ -21,6 +24,11 @@ public class DeckSettingsPanel extends JPanel {
     private JTextArea descriptionArea;
     private JTextField languagesField;
 
+    /**
+     * Constructs the settings form
+     * @param deck deck to construct a settings form for
+     * @param parentDialog dialog to contain the panel
+     */
     public DeckSettingsPanel(Deck deck, EventBus eventBus, JDialog parentDialog) {
         this.deck = deck;
         this.eventBus = eventBus;
@@ -34,6 +42,10 @@ public class DeckSettingsPanel extends JPanel {
         populateFields();
     }
 
+    /**
+     * Creates the main form layout
+     * @return constructed panel
+     */
     private JPanel createFormPanel() {
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -77,21 +89,30 @@ public class DeckSettingsPanel extends JPanel {
         return formPanel;
     }
 
+    /**
+     * Creates action buttons for saving and canceling
+     * @param parentDialog dialog to contain the buttons
+     * @return the panel containing the buttons
+     */
     private JPanel createButtonPanel(JDialog parentDialog) {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         JButton cancelButton = new JButton("Cancel");
+        cancelButton.setFocusable(false);
         cancelButton.addActionListener(_ -> parentDialog.dispose());
         buttonPanel.add(cancelButton);
 
         JButton saveButton = new JButton("Save Settings");
-        saveButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "primary");
+        saveButton.setFocusable(false);
         saveButton.addActionListener(_ -> saveSettings(parentDialog));
         buttonPanel.add(saveButton);
 
         return buttonPanel;
     }
 
+    /**
+     * Populates the fields with current metadata
+     */
     private void populateFields() {
         titleField.setText(deck.getTitle() != null ? deck.getTitle() : "");
         authorField.setText(deck.getAuthor() != null ? deck.getAuthor() : "");
@@ -102,6 +123,10 @@ public class DeckSettingsPanel extends JPanel {
         }
     }
 
+    /**
+     * Saves the changes from the form
+     * @param parentDialog dialog containing the form
+     */
     private void saveSettings(JDialog parentDialog) {
         deck.setTitle(titleField.getText().trim());
         deck.setAuthor(authorField.getText().trim());

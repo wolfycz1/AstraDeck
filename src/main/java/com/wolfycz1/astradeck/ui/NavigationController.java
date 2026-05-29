@@ -21,6 +21,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Router for the application, listens for events to swap views
+ * @author wolfycz1
+ */
 public class NavigationController {
     private final EventBus eventBus;
     private final MainFrame mainFrame;
@@ -45,6 +49,9 @@ public class NavigationController {
         this.eventBus.register(this);
     }
 
+    /**
+     * Loads saved data and shows the initial dashboard
+     */
     public void start() {
         List<Deck> savedDecks = deckRepositoryService.loadAllDecks();
         this.dashboardPanel = new DashboardPanel(eventBus, astraArchiveHandler, savedDecks);
@@ -52,6 +59,10 @@ public class NavigationController {
         mainFrame.setVisible(true);
     }
 
+    /**
+     * Initializes a study manager and switches to a study view
+     * @param event deck to intialize a study manager for
+     */
     @Subscribe
     public void onStudyRequest(RequestStudyEvent event) {
         StudySessionManager studySessionManager = new StudySessionManager(event.deck(), new Sm2Algorithm(), eventBus);
@@ -61,11 +72,18 @@ public class NavigationController {
         studySessionManager.startSession();
     }
 
+    /**
+     * Returns to the dashboard on aborting the study session
+     */
     @Subscribe
-    public void onSessionAborted(SessionAbortedEvent event) {
+    public void onSessionAborted(SessionAbortedEvent ignored) {
         returnToDashboard();
     }
 
+    /**
+     * Displays a completion pop-up and returns to the dashboard
+     * @param event event containing total reviewed cards
+     */
     @Subscribe
     public void onSessionFinished(SessionFinishedEvent event) {
         Window parentWindow = SwingUtilities.getWindowAncestor(mainFrame);
@@ -74,6 +92,10 @@ public class NavigationController {
         returnToDashboard();
     }
 
+    /**
+     * Initializes a deck editor and switches to its view panel
+     * @param event deck to initialize an editor for
+     */
     @Subscribe
     public void onEditorRequest(RequestEditEvent event) {
         List<FlashcardEditor<?>> registeredEditors = List.of(new TextCardEditor(),
@@ -83,11 +105,17 @@ public class NavigationController {
         mainFrame.setView(MainFrame.VIEW_EDITOR, currentEditorPanel);
     }
 
+    /**
+     * Switches to the dashboard on request
+     */
     @Subscribe
-    public void onReturnToDashboard(ReturnToDashboardEvent event) {
+    public void onReturnToDashboard(ReturnToDashboardEvent ignored) {
         returnToDashboard();
     }
 
+    /**
+     * Executes the switch back to the dashboard and cleans up the active panels
+     */
     private void returnToDashboard() {
         mainFrame.setView(MainFrame.VIEW_DASHBOARD, dashboardPanel);
 

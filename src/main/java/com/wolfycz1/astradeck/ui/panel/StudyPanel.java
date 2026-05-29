@@ -18,6 +18,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+/**
+ * Main panel for study sessions. Displays flashcards, study progress and processes grading.
+ * @author wolfycz1
+ */
 @SuppressWarnings("ExtractMethodRecommender")
 public class StudyPanel extends JPanel {
     private final StudySessionManager studySessionManager;
@@ -34,16 +38,20 @@ public class StudyPanel extends JPanel {
     private static final String STATE_ANSWER = "ANSWER";
     private String currentState = STATE_QUESTION;
 
+    /**
+     * Constructs a new study panel for the study session
+     */
     public StudyPanel(StudySessionManager studySessionManager, EventBus eventBus, ImageProvider imageProvider) {
         this.studySessionManager = studySessionManager;
         this.eventBus = eventBus;
         this.eventBus.register(this);
 
         this.setLayout(new BorderLayout(20, 20));
-        this.putClientProperty(FlatClientProperties.STYLE_CLASS, "StudyPanel");
+        this.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JButton abortButton = new JButton("Abort Session");
-        abortButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "abortButton");
+        abortButton.setFocusable(false);
+        abortButton.putClientProperty(FlatClientProperties.STYLE, "hoverBorderColor: #FF4444");
         abortButton.addActionListener(_ -> {
             int choice = JOptionPane.showConfirmDialog(
                     this,
@@ -63,7 +71,7 @@ public class StudyPanel extends JPanel {
 
         JLabel deckTitle = new JLabel(studySessionManager.getDeckTitle());
         deckTitle.setHorizontalAlignment(JLabel.CENTER);
-        deckTitle.putClientProperty(FlatClientProperties.STYLE_CLASS, "deckTitle");
+        deckTitle.putClientProperty(FlatClientProperties.STYLE, "font: bold +12");
 
         JPanel headerPanel = new JPanel(new BorderLayout(0, 10));
         headerPanel.add(progressBar, BorderLayout.NORTH);
@@ -88,14 +96,18 @@ public class StudyPanel extends JPanel {
         JPanel questionFooter = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton showAnswerButton = new JButton("Show answer (SPACE)");
         showAnswerButton.addActionListener(_ -> revealAnswer());
-        showAnswerButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        showAnswerButton.setFocusable(false);
         questionFooter.add(showAnswerButton);
 
         JPanel answerFooter = new JPanel(new GridLayout(1, 4, 15, 0));
-        answerFooter.add(createGradeButton("Again (1)", ReviewGrade.BLACKOUT, "gradeAgain"));
-        answerFooter.add(createGradeButton("Hard (2)", ReviewGrade.HARD, "gradeHard"));
-        answerFooter.add(createGradeButton("Good (3)", ReviewGrade.GOOD, "gradeGood"));
-        answerFooter.add(createGradeButton("Easy (4)", ReviewGrade.EASY, "gradeEasy"));
+        answerFooter.add(createGradeButton("Again (1)", ReviewGrade.BLACKOUT,
+                "outlineColor: #FF4444; borderWidth: 0; hoverBackground: darken(#FF4444, 15%)"));
+        answerFooter.add(createGradeButton("Hard (2)", ReviewGrade.HARD,
+                "outlineColor: #FFBB33; borderWidth: 0; hoverBackground: darken(#FFBB33, 15%)"));
+        answerFooter.add(createGradeButton("Good (3)", ReviewGrade.GOOD,
+                "outlineColor: #00C851; borderWidth: 0; hoverBackground: darken(#00C851, 15%)"));
+        answerFooter.add(createGradeButton("Easy (4)", ReviewGrade.EASY,
+                "outlineColor: #33B5E5; borderWidth: 0; hoverBackground: darken(#33B5E5, 15%)"));
 
         footerPanel.add(questionFooter, STATE_QUESTION);
         footerPanel.add(answerFooter, STATE_ANSWER);
@@ -104,23 +116,41 @@ public class StudyPanel extends JPanel {
         setupKeybinds();
     }
 
+    /**
+     * Constructs a new grade button
+     * @param text text on the button
+     * @param reviewGrade review grade assigned to the button
+     * @param style style of the button
+     * @return the constructed grade button
+     */
     private JButton createGradeButton(String text, ReviewGrade reviewGrade, String style) {
         JButton button = new JButton(text);
         button.addActionListener(_ -> processGrade(reviewGrade));
-        button.putClientProperty(FlatClientProperties.STYLE_CLASS, style);
+        button.putClientProperty(FlatClientProperties.STYLE, style);
         return button;
     }
 
+    /**
+     * Reveals the answer side of the flashcard
+     */
     private void revealAnswer() {
         cardViewPanel.showBack();
         footerCardLayout.show(footerPanel, STATE_ANSWER);
         currentState = STATE_ANSWER;
     }
 
+    /**
+     * Sumbits a grade to be processed
+     * @param reviewGrade grade to be processed
+     */
     private void processGrade(ReviewGrade reviewGrade) {
         studySessionManager.processAnswer(reviewGrade);
     }
 
+    /**
+     * Handles presenting a new card during a study session
+     * @param event event containing the card to display
+     */
     @Subscribe
     public void onNewCard(NewCardPresentedEvent event) {
         cardViewPanel.setCard(event.card());
@@ -137,6 +167,11 @@ public class StudyPanel extends JPanel {
         remainingLabel.setText("Remaining: " + remaining);
     }
 
+    /**
+     * Sets up keybinds
+     * 1, 2, 3, 4 - grading
+     * SPACE, ENTER - show answer
+     */
     private void setupKeybinds() {
         InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = this.getActionMap();
@@ -156,6 +191,13 @@ public class StudyPanel extends JPanel {
         bindGradeKey(inputMap, actionMap, "4", ReviewGrade.EASY);
     }
 
+    /**
+     * Binds a keybind to a review grade action
+     * @param inputMap input map of the component
+     * @param actionMap action map of the component
+     * @param key key to bind
+     * @param reviewGrade review grade to bind the key to
+     */
     private void bindGradeKey(InputMap inputMap, ActionMap actionMap, String key, ReviewGrade reviewGrade) {
         inputMap.put(KeyStroke.getKeyStroke(key), "grade" + key);
         actionMap.put("grade" + key, new AbstractAction() {
@@ -166,6 +208,9 @@ public class StudyPanel extends JPanel {
         });
     }
 
+    /**
+     * Ensures the panels unregisters itself from the eventbus
+     */
     @Override
     public void removeNotify() {
         super.removeNotify();

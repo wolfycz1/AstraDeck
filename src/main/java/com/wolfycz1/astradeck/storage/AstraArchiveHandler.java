@@ -24,12 +24,19 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Handles packing and unpacking AstraDeck archives (.astra)
+ * @author wolfycz1
+ */
 @Slf4j
 public class AstraArchiveHandler {
     private final ObjectMapper mapper;
     private final MediaStorageService mediaStorageService;
     private final ImageProvider imageProvider;
 
+    /**
+     * Sets up the JSON object mapper configuration and modules
+     */
     public AstraArchiveHandler(MediaStorageService mediaStorageService, ImageProvider imageProvider) {
         this.mapper = new ObjectMapper();
         this.mapper.registerModule(new JavaTimeModule());
@@ -43,6 +50,11 @@ public class AstraArchiveHandler {
         this.mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
     }
 
+    /**
+     * Unpacks a .astra deck file, validates its contents, extracts media and loads the deck in memory
+     * @param filePath path to the .astra file
+     * @return the imported {@link Deck} object
+     */
     public Deck importAstraArchive(Path filePath) throws AstraArchiveException, IOException {
         try (ZipFile zipFile = new ZipFile(filePath.toFile())) {
             ZipEntry manifestEntry = zipFile.getEntry("manifest.json");
@@ -91,6 +103,11 @@ public class AstraArchiveHandler {
         }
     }
 
+    /**
+     * Packs a deck, its manifest and media files into an exported .astra archive
+     * @param deck the deck to export
+     * @param destination the destination to export the archive to
+     */
     public void exportAstraArchive(Deck deck, Path destination) throws AstraArchiveException, IOException {
         Manifest manifest = ManifestManager.generateManifest(deck);
 

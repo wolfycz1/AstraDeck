@@ -21,6 +21,10 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * Manages saving, retrieving and cleanup of media files
+ * @author wolfycz1
+ */
 @Slf4j
 public class MediaStorageService {
     private final Path persistentDir;
@@ -32,6 +36,9 @@ public class MediaStorageService {
         initializeDirectories();
     }
 
+    /**
+     * Initializes the application's persistent and cache directories
+     */
     private void initializeDirectories() {
         try {
             if (!Files.exists(persistentDir)) {
@@ -47,6 +54,11 @@ public class MediaStorageService {
         }
     }
 
+    /**
+     * Saves media files from an import deck to local storage
+     * @param deckPath path to the deck
+     * @param manifest manifest of the deck
+     */
     public void extractMedia(Path deckPath, Manifest manifest) throws IOException {
         log.info("Extracting media for deck: {}", manifest.getTitle());
         try (ZipFile zipFile = new ZipFile(deckPath.toFile())) {
@@ -66,10 +78,20 @@ public class MediaStorageService {
         }
     }
 
+    /**
+     * Resolves the file of a given media
+     * @param media given {@link Media} object
+     * @return the file of the {@link Media} object
+     */
     public File getMediaFile(Media media) {
         return persistentDir.resolve(media.getFileName()).toFile();
     }
 
+    /**
+     * Saves user's local file to the app's storage, hashing its name to prevent duplicates
+     * @param sourceFile path to the source file
+     * @return {@link Media} object for the imported media file
+     */
     public Media importLocalImage(File sourceFile) throws IOException, NoSuchAlgorithmException {
         String originalName = sourceFile.getName();
         String format = FilenameUtils.getExtension(sourceFile.getName()).toLowerCase();
@@ -87,6 +109,11 @@ public class MediaStorageService {
         return media;
     }
 
+    /**
+     * Calculates the SHA-256 hash of a file
+     * @param file file to calculate for
+     * @return the SHA-256 string
+     */
     private String generateHashName(File file) throws IOException, NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         try (InputStream is = Files.newInputStream(file.toPath())) {
@@ -100,6 +127,10 @@ public class MediaStorageService {
         return HexFormat.of().formatHex(digest.digest(fileBytes));
     }
 
+    /**
+     * Triggers a cleanup of all media files no longer tied to anything
+     * @param activeHashes set of all hashes that are referenced at least once
+     */
     public void garbageCollectMedia(Set<String> activeHashes) {
         log.info("Starting media garbage collection. Active DB references: {}", activeHashes.size());
         garbageCollectMedia(persistentDir, activeHashes, false);
@@ -107,6 +138,13 @@ public class MediaStorageService {
         log.info("Media garbage collection complete.");
     }
 
+    /**
+     * Deletes files from the specified directory if they're not in the active hashes
+     * and are older than 30 minutes
+     * @param directory path to the directory to clean up
+     * @param activeHashes set of all hashes that are references at least once
+     * @param isCacheDir {@code true} if deleting cache files, otherwise {@code false}
+     */
     private void garbageCollectMedia(Path directory, Set<String> activeHashes, boolean isCacheDir) {
         if (!Files.exists(directory)) return;
         Instant now = Instant.now();

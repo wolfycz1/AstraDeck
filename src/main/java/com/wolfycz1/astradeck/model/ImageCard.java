@@ -7,12 +7,20 @@ import lombok.EqualsAndHashCode;
 
 import java.util.stream.Stream;
 
+/**
+ * A flashcard with an image on the front
+ * @author wolfycz1
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ImageCard extends Flashcard {
     private ImageSide front;
     private TextSide back;
 
+    /**
+     * Generates a short preview text representing the image card for the UI
+     * @return short preview string
+     */
     @Override
     public String getPreviewText() {
         if (front != null) {
@@ -25,6 +33,10 @@ public class ImageCard extends Flashcard {
         return "[Empty Image Card]";
     }
 
+    /**
+     * Collects any image files attached to this card
+     * @return stream of {@link Media} objects
+     */
     @Override
     public Stream<Media> getReferencedMedia() {
         if (front != null && front.getImage() != null) {

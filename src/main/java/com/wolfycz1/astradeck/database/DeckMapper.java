@@ -12,10 +12,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Maps database rows from decks table to Deck objects
+ * @author wolfycz1
+ */
 @Slf4j
 public class DeckMapper implements RowMapper<Deck> {
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Converts a single database row into a {@link Deck} object
+     * @param rs {@link ResultSet} containing row data
+     * @param ctx Jdbi {@link StatementContext} containing execution context and configuration
+     * @return the created {@link Deck} object
+     * @throws SQLException error thrown by the database
+     */
     @Override
     public Deck map(ResultSet rs, StatementContext ctx) throws SQLException {
         Deck deck = new Deck();

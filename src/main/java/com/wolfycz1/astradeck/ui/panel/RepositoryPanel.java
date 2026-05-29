@@ -19,6 +19,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Panel represeting the deck discovery page for the decks from the remote repository
+ * @author wolfycz1
+ */
 @Slf4j
 public class RepositoryPanel extends JPanel {
     private final EventBus eventBus;
@@ -40,6 +44,10 @@ public class RepositoryPanel extends JPanel {
         KeyEvent.VK_ENTER
     };
 
+    /**
+     * Constructs the discovery panel and setting up the search function
+     * @param existingDecks decks already on local storage
+     */
     public RepositoryPanel(EventBus eventBus, AstraArchiveHandler astraArchiveHandler, RemoteRepositoryService remoteRepositoryService, List<Deck> existingDecks) {
         this.eventBus = eventBus;
         this.astraArchiveHandler = astraArchiveHandler;
@@ -47,13 +55,13 @@ public class RepositoryPanel extends JPanel {
         this.existingDecks = existingDecks;
 
         this.setLayout(new BorderLayout());
-        this.putClientProperty(FlatClientProperties.STYLE_CLASS, "RepositoryPanel");
+        this.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         JPanel topBar = new JPanel(new BorderLayout(15, 0));
         topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel titleLabel = new JLabel("AstraDeck Decks");
-        titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "logoLabel");
+        titleLabel.putClientProperty(FlatClientProperties.STYLE, "font: +10 bold; foreground: $Component.accentColor");
         topBar.add(titleLabel, BorderLayout.WEST);
 
         Timer debounceTimer = new Timer(300, _ -> filterDecks());
@@ -79,21 +87,22 @@ public class RepositoryPanel extends JPanel {
         topBar.add(searchField, BorderLayout.CENTER);
 
         refreshButton = new JButton("Refresh");
-        refreshButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        refreshButton.setFocusable(false);
         refreshButton.addActionListener(_ -> loadDecks());
         topBar.add(refreshButton, BorderLayout.EAST);
 
         this.add(topBar, BorderLayout.NORTH);
 
         gridContainer = new JPanel(new GridLayout(0, 2, 20, 20));
-        gridContainer.putClientProperty(FlatClientProperties.STYLE_CLASS, "gridContainer");
+        gridContainer.setOpaque(false);
 
         JPanel gridWrapper = new JPanel(new BorderLayout());
-        gridWrapper.putClientProperty(FlatClientProperties.STYLE_CLASS, "gridWrapper");
+        gridWrapper.setOpaque(false);
+        gridWrapper.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         gridWrapper.add(gridContainer, BorderLayout.NORTH);
 
         JScrollPane scrollPane = new JScrollPane(gridWrapper);
-        scrollPane.putClientProperty(FlatClientProperties.STYLE_CLASS, "scrollPane");
+        scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         this.add(scrollPane, BorderLayout.CENTER);
@@ -102,6 +111,7 @@ public class RepositoryPanel extends JPanel {
         loadDecks();
     }
 
+    /** Key listener for konami code. Triggers secret developer menu for repository override. **/
     private void setupKonamiCodeListener() {
         KeyEventDispatcher dispatcher = new KeyEventDispatcher() {
             private int index = 0;
@@ -134,6 +144,7 @@ public class RepositoryPanel extends JPanel {
         });
     }
 
+    /** Shows the secret menu for repository override **/
     private void showSecretMenu() {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
         String currentUrl = remoteRepositoryService.getIndexUrl();
@@ -160,6 +171,9 @@ public class RepositoryPanel extends JPanel {
         }
     }
 
+    /**
+     * Fetches all available decks from the remote repository
+     */
     private void loadDecks() {
         if (refreshButton != null) {
             refreshButton.setEnabled(false);
@@ -203,6 +217,9 @@ public class RepositoryPanel extends JPanel {
         }.execute();
     }
 
+    /**
+     * Filters the deck by the search query
+     */
     private void filterDecks() {
         String query = searchField.getText().toLowerCase().trim();
         gridContainer.removeAll();
@@ -225,26 +242,36 @@ public class RepositoryPanel extends JPanel {
         gridContainer.repaint();
     }
 
+    /**
+     * Widget representing a downloadable deck
+     * @author wolfycz1
+     */
     private class RepositoryDeckWidget extends JPanel {
+        /**
+         * Construct the widget representing a signle remote repository deck
+         * @param repositoryDeck deck data to display
+         */
         public RepositoryDeckWidget(RepositoryDeck repositoryDeck) {
             this.setLayout(new BorderLayout(15, 15));
-            this.putClientProperty(FlatClientProperties.STYLE_CLASS, "DeckWidget");
+            this.putClientProperty(FlatClientProperties.STYLE, "arc: 12; background: $TextArea.background;" +
+                    "border: 15,15,15,15,$Component.borderColor, 1,1,1,1");
 
             JPanel infoPanel = new JPanel();
             infoPanel.setOpaque(false);
             infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
             JLabel titleLabel = new JLabel(repositoryDeck.getTitle());
-            titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "titleLabel");
+            titleLabel.putClientProperty(FlatClientProperties.STYLE, "font: bold +3");
+            Font currentFont = titleLabel.getFont();
+            titleLabel.setFont(currentFont.deriveFont(Font.BOLD,currentFont.getSize() + 3f));
             infoPanel.add(titleLabel);
             infoPanel.add(Box.createVerticalStrut(5));
 
             JLabel authorLabel = new JLabel("By: " + (repositoryDeck.getAuthor() != null ? repositoryDeck.getAuthor() : "Unknown"));
-            authorLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "subtitleLabel");
+            authorLabel.putClientProperty(FlatClientProperties.STYLE, "font: -1; foreground: $Label.disabledForeground");
             infoPanel.add(authorLabel);
             infoPanel.add(Box.createVerticalStrut(5));
 
-            //~~~
             JLabel descriptionLabel = new JLabel("<html>" + (repositoryDeck.getDescription() != null ? repositoryDeck.getDescription() : "") + "</html>");
             infoPanel.add(descriptionLabel);
 
@@ -267,6 +294,11 @@ public class RepositoryPanel extends JPanel {
             this.add(downloadButton, BorderLayout.SOUTH);
         }
 
+        /**
+         * Asynchronously downloads the AstraDeck deck and imports it
+         * @param repositoryDeck the deck to download
+         * @param button button that triggered the download action (to disable it)
+         */
         private void downloadDeck(RepositoryDeck repositoryDeck, JButton button) {
             button.setEnabled(false);
             button.setText("Downloading...");
@@ -287,7 +319,7 @@ public class RepositoryPanel extends JPanel {
                     Window parentWindow = SwingUtilities.getWindowAncestor(RepositoryPanel.this);
                     try {
                         Path downloadedFile = get();
-                        if (downloadedFile == null) return; // ~~
+                        if (downloadedFile == null) return;
                         button.setText("Importing...");
 
                         Deck importedDeck = astraArchiveHandler.importAstraArchive(downloadedFile);

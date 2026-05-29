@@ -6,23 +6,35 @@ import com.wolfycz1.astradeck.model.sides.ImageSide;
 import com.wolfycz1.astradeck.model.sides.TextSide;
 import com.wolfycz1.astradeck.ui.util.ImageProvider;
 import com.wolfycz1.astradeck.util.Constants;
+import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
+/**
+ * Generates the visual UI panel for a flashcard that include an image alongside text
+ * @author wolfycz1
+ */
+@SuppressWarnings("DuplicatedCode")
+@RequiredArgsConstructor
 public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
     private final ImageProvider imageProvider;
 
-    public ImageCardRenderer(ImageProvider imageProvider) {
-        this.imageProvider = imageProvider;
-    }
-
+    /**
+     * Returns the class type this renderer supports
+     * @return {@link ImageCard} class
+     */
     @Override
     public Class<ImageCard> getSupportedType() {
         return ImageCard.class;
     }
 
+    /**
+     * Builds the UI panel for the front side of the flashcard
+     * @param card card to build the ui for
+     * @return the {@link JPanel} for the front view
+     */
     @Override
     public JPanel createFrontView(ImageCard card) {
         JPanel panel = new JPanel();
@@ -31,7 +43,7 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
 
         JLabel textLabel = new JLabel();
         textLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        textLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "frontTextLabel");
+        textLabel.putClientProperty(FlatClientProperties.STYLE, "font: +8");
         Optional.ofNullable(card.getFront()).map(ImageSide::getText).ifPresent(textLabel::setText);
 
         JLabel imageLabel = new JLabel();
@@ -47,6 +59,11 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
         return panel;
     }
 
+    /**
+     * Builds the UI panel for the back side of the flashcard
+     * @param card card to build the ui for
+     * @return the {@link JPanel} for the back view
+     */
     @Override
     public JPanel createBackView(ImageCard card) {
         JPanel panel = new JPanel();
@@ -54,7 +71,7 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
 
         JLabel label = new JLabel();
         label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.putClientProperty(FlatClientProperties.STYLE_CLASS, "backTextLabel");
+        label.putClientProperty(FlatClientProperties.STYLE, "font: +4");
         Optional.ofNullable(card.getBack()).map(TextSide::getText).ifPresent(label::setText);
         panel.add(label);
 

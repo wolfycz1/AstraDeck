@@ -17,6 +17,10 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+/**
+ * Controls the study session, queues due cards and tracks progress
+ * @author wolfycz1
+ */
 @RequiredArgsConstructor
 public class StudySessionManager {
     private final Deck deck;
@@ -36,6 +40,9 @@ public class StudySessionManager {
     @Getter
     private int cardsReviewedThisSession = 0;
 
+    /**
+     * Initializes the session by finding all cards due for review and loads the first one
+     */
     public void startSession() {
         Instant now = Instant.now();
         resetSession();
@@ -56,6 +63,9 @@ public class StudySessionManager {
         loadNextCard();
     }
 
+    /**
+     * Loads the next due card from the queue and presents it
+     */
     private void loadNextCard() {
         currentState = dueCardsQueue.poll();
         if (currentState != null) {
@@ -70,6 +80,10 @@ public class StudySessionManager {
         }
     }
 
+    /**
+     * Updates the card's review state based on the grade selected and triggers a new card load
+     * @param grade the grade given
+     */
     public void processAnswer(ReviewGrade grade) {
         if (currentState == null) return;
 
@@ -85,19 +99,33 @@ public class StudySessionManager {
         loadNextCard();
     }
 
+    /**
+     * Aborts the current study session
+     */
     public void abortSession() {
         resetSession();
         eventBus.post(new SessionAbortedEvent());
     }
 
+    /**
+     * Returns the title of the currently studied deck
+     * @return title of the deck
+     */
     public String getDeckTitle() {
         return deck.getTitle();
     }
 
+    /**
+     * Calculates remaining card count in this session
+     * @return number of cards remaining
+     */
     public int getRemainingCardsCount() {
         return dueCardsQueue.size() + (currentState != null ? 1 : 0);
     }
 
+    /**
+     * Clears the queue and resets all progress counters
+     */
     private void resetSession() {
         dueCardsQueue.clear();
         currentCard = null;

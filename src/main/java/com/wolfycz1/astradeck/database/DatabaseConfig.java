@@ -12,11 +12,21 @@ import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import java.io.IOException;
 import java.nio.file.Files;
 
+/**
+ * Handles the setup and configuration of the local SQLite database
+ * @author wolfycz1
+ */
 public class DatabaseConfig {
     private static final String DB_FILENAME = "astradeck.db";
     private static final String DB_PARAMS = "?foreign_keys=on&busy_timeout=5000";
     private static final String DB_URL = "jdbc:sqlite:" + OsPaths.DATA_DIR.resolve(DB_FILENAME).toAbsolutePath() + DB_PARAMS;
 
+    /**
+     * Creates the app's data directory
+     * Runs database migration via Flyway
+     * Configures Jdbi
+     * @return configured Jdbi instance for database operations
+     */
     public static Jdbi initializeDatabase() {
         try {
             Files.createDirectories(OsPaths.DATA_DIR);

@@ -5,6 +5,10 @@ import lombok.Data;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Tracks spaced repetition progress for a single flashcard
+ * @author wolfycz1
+ */
 @Data
 public class ReviewState {
     private UUID cardId;

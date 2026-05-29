@@ -10,8 +10,17 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for generating manifest files
+ * @author wolfycz1
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ManifestManager {
+    /**
+     * Generates a manifest based on the deck
+     * @param deck the deck to generate manifest for
+     * @return the {@link Manifest} object with the manifest data
+     */
     public static Manifest generateManifest(Deck deck) {
         Manifest manifest = new Manifest();
         manifest.setDeckId(deck.getId());

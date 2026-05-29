@@ -17,6 +17,10 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Handles network requests to fetch available decks and download them from a remote repository
+ * @author wolfycz1
+ */
 @Slf4j
 public class RemoteRepositoryService {
     @Getter
@@ -34,6 +38,10 @@ public class RemoteRepositoryService {
                 .build();
     }
 
+    /**
+     * Reaches to the remote repository for a list of available decks
+     * @return list of avaiable decks to download in form of {@link RepositoryDeck} objects
+     */
     public List<RepositoryDeck> fetchAvailabeDecks() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(indexUrl))
@@ -48,6 +56,11 @@ public class RemoteRepositoryService {
         return objectMapper.readValue(response.body(), new TypeReference<>() {});
     }
 
+    /**
+     * Downloads a deck from the remote repository
+     * @param downloadUrl url to the deck file
+     * @return local file path of the temporarily saved deck
+     */
     public Path downloadDeck(String downloadUrl) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(downloadUrl))

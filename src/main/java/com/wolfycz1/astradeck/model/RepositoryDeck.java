@@ -6,6 +6,10 @@ import lombok.Data;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Represents the metadata of a deck listed on the remote repository
+ * @author wolfycz1
+ */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RepositoryDeck {

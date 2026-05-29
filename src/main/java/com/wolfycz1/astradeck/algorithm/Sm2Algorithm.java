@@ -5,7 +5,17 @@ import com.wolfycz1.astradeck.model.ReviewState;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Implements the SM-2 space repetition alogorithm to calculate review intervals
+ * @author woflycz1
+ */
 public class Sm2Algorithm implements ReviewAlgorithm {
+    /**
+     * Calculates the next review date, interval, ease-factor based on the SM-2 formula.
+     * Modifies review state directly
+     * @param state current state of the item being review
+     * @param grade the grade given
+     */
     @Override
     public void processReview(ReviewState state, ReviewGrade grade) {
         int q = grade.getValue();

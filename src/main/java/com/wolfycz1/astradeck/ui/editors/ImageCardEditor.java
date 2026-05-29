@@ -1,6 +1,5 @@
 package com.wolfycz1.astradeck.ui.editors;
 
-import com.formdev.flatlaf.FlatClientProperties;
 import com.wolfycz1.astradeck.model.ImageCard;
 import com.wolfycz1.astradeck.model.Media;
 import com.wolfycz1.astradeck.model.sides.ImageSide;
@@ -18,6 +17,10 @@ import java.awt.*;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * An editor panel that allows attaching an image to the flashcard
+ * @author wolfycz1
+ */
 @Slf4j
 public class ImageCardEditor implements FlashcardEditor<ImageCard> {
     private final JPanel panel;
@@ -29,6 +32,9 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
     private final ImageProvider imageProvider;
     private Media currentMedia;
 
+    /**
+     * Sets up the editor view and its document listener
+     */
     public ImageCardEditor(MediaStorageService mediaStorageService, ImageProvider imageProvider) {
         this.mediaStorageService = mediaStorageService;
         this.imageProvider = imageProvider;
@@ -40,7 +46,7 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
         imageHeader.setBorder(BorderFactory.createTitledBorder("Image attachment"));
 
         JButton attachImageButton = new JButton("Attach Image");
-        attachImageButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "standard");
+        attachImageButton.setFocusable(false);
         attachImageButton.addActionListener(_ -> handleImageAttach());
         imageHeader.add(attachImageButton, BorderLayout.EAST);
 
@@ -87,6 +93,10 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
         backText.getDocument().addDocumentListener(documentListener);
     }
 
+    /**
+     * Opens a file dialog to let the user select an image,
+     * imports it to local storage, and scales it in the background
+     */
     private void handleImageAttach() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Select an image");
@@ -111,30 +121,51 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
         }
     }
 
+    /** Helper method to run the change listener whenever the text or image is modified. */
     private void notifyChange() {
         if (changeListener != null) changeListener.run();
     }
 
+    /**
+     * Returns the class type this editor supports
+     * @return {@link ImageCard} class
+     */
     @Override
     public Class<ImageCard> getSupportedType() {
         return ImageCard.class;
     }
 
+    /**
+     * Returns the display name of the editor
+     * @return "Image Card"
+     */
     @Override
     public String getDisplayName() {
         return "Image Card";
     }
 
+    /**
+     * Instantiates a new card of the supported type
+     * @return new {@link ImageCard}
+     */
     @Override
     public ImageCard createNewCard() {
         return new ImageCard();
     }
 
+    /**
+     * Returns the main {@link JPanel} containing the editor
+     * @return main {@link JPanel}
+     */
     @Override
     public JPanel getUI() {
         return panel;
     }
 
+    /**
+     * Populates the editor fields with the card data
+     * @param card the card data
+     */
     @Override
     public void populate(ImageCard card) {
         if (card.getFront() != null) {
@@ -159,6 +190,10 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
         }
     }
 
+    /**
+     * Saves the editor fields to the card
+     * @param card the {@link ImageCard} object to save to
+     */
     @Override
     public void saveTo(ImageCard card) {
         if (card.getFront() == null) card.setFront(new ImageSide());
@@ -169,11 +204,18 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
         card.getBack().setText(backText.getText());
     }
 
+    /**
+     * Registers a callback on whenever a change is made
+     * @param onChange {@link Runnable} listener
+     */
     @Override
     public void setChangeListener(Runnable onChange) {
         this.changeListener = onChange;
     }
 
+    /**
+     * Puts the cursor in the primary field of the editor
+     */
     @Override
     public void requestFocus() {
         if (frontText != null) {

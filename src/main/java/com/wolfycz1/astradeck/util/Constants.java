@@ -3,6 +3,15 @@ package com.wolfycz1.astradeck.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+/**
+ * Holds global application constants
+ * <p>
+ * App's name, version, major version,
+ * AstraArchive's format version,
+ * UI dimensions...
+ * </p>
+ * @author wolfycz1
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Constants {
     public static final String APP_NAME = "AstraDeck";
