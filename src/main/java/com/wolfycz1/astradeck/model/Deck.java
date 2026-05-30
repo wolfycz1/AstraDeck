@@ -3,6 +3,7 @@ package com.wolfycz1.astradeck.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.*;
@@ -13,7 +14,9 @@ import java.util.stream.Collectors;
  * @author wolfycz1
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Deck {
+    @EqualsAndHashCode.Include
     private UUID id = UUID.randomUUID();
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();

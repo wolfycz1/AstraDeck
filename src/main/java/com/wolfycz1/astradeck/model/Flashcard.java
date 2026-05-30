@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.errorprone.annotations.MustBeClosed;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -24,7 +25,9 @@ import java.util.stream.Stream;
         @JsonSubTypes.Type(value = TextCard.class, name = "text"),
         @JsonSubTypes.Type(value = ImageCard.class, name = "image")
 })
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class Flashcard {
+    @EqualsAndHashCode.Include
     private UUID id = UUID.randomUUID();
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();

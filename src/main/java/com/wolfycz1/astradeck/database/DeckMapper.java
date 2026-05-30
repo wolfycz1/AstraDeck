@@ -6,6 +6,7 @@ import com.wolfycz1.astradeck.model.Deck;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.jackson2.Jackson2Config;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,8 +19,6 @@ import java.util.UUID;
  */
 @Slf4j
 public class DeckMapper implements RowMapper<Deck> {
-    private final ObjectMapper mapper = new ObjectMapper();
-
     /**
      * Converts a single database row into a {@link Deck} object
      * @param rs {@link ResultSet} containing row data
@@ -29,6 +28,8 @@ public class DeckMapper implements RowMapper<Deck> {
      */
     @Override
     public Deck map(ResultSet rs, StatementContext ctx) throws SQLException {
+        ObjectMapper mapper = ctx.getConfig(Jackson2Config.class).getMapper();
+
         Deck deck = new Deck();
         deck.setId(UUID.fromString(rs.getString("id")));
         deck.setTitle(rs.getString("title"));

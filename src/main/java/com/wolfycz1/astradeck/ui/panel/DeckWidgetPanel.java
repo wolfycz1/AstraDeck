@@ -28,7 +28,7 @@ public class DeckWidgetPanel extends JPanel {
 
         long dueCards = deck.getReviewData().values().stream()
                 .map(ReviewState::getNextReviewDate)
-                .filter(date -> date != null && date.isBefore(Instant.now()))
+                .filter(date -> date != null && !date.isAfter(Instant.now()))
                 .count();
 
         JPanel infoPanel = new JPanel();
@@ -105,7 +105,7 @@ public class DeckWidgetPanel extends JPanel {
         deleteItem.addActionListener(_ -> {
             Window parentWindow = SwingUtilities.getWindowAncestor(this);
             int confirm = JOptionPane.showConfirmDialog(parentWindow,
-                    "Delete '" + deck.getTitle() + "' from memory?",
+                    "Delete '" + deck.getTitle() + "' permanently?",
                     "Delete deck", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 eventBus.post(new DeckDeletedEvent(deck.getId()));

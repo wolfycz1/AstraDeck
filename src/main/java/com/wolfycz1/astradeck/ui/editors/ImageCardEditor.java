@@ -15,7 +15,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * An editor panel that allows attaching an image to the flashcard
@@ -106,11 +105,9 @@ public class ImageCardEditor implements FlashcardEditor<ImageCard> {
             File selectedFile = fileChooser.getSelectedFile();
             try {
                 this.currentMedia = mediaStorageService.importLocalImage(selectedFile);
-                CompletableFuture.runAsync(() -> {
-                    log.info("Starting background image scale");
-                    imageProvider.preloadIcon(currentMedia, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
-                    log.info("Background image scale cached.");
-                });
+                log.info("Starting background image scale");
+                imageProvider.preloadIcon(currentMedia, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
+                log.info("Background image scale tasks submitted.");
 
                 imagePreview.setText("Attached: " + currentMedia.originalName());
                 notifyChange();

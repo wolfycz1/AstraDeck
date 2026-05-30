@@ -37,8 +37,7 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
         label.putClientProperty(FlatClientProperties.STYLE, "font: +8");
         Optional.ofNullable(card.getFront())
                 .map(TextSide::getText)
-                .map(text -> "<html><center>" +
-                        text.replace("\n", "<br>") + "</center></html>")
+                .map(this::formatCardText)
                 .ifPresent(label::setText);
         panel.add(label);
 
@@ -60,8 +59,7 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
         label.putClientProperty(FlatClientProperties.STYLE, "font: +4");
         Optional.ofNullable(card.getBack())
                 .map(TextSide::getText)
-                .map(text -> "<html><center>" +
-                        text.replace("\n", "<br>") + "</center></html>")
+                .map(this::formatCardText)
                 .ifPresent(label::setText);
         panel.add(label);
 

@@ -140,7 +140,7 @@ public class StudyPanel extends JPanel {
     }
 
     /**
-     * Sumbits a grade to be processed
+     * Submits a grade to be processed
      * @param reviewGrade grade to be processed
      */
     private void processGrade(ReviewGrade reviewGrade) {

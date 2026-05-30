@@ -30,8 +30,8 @@ public class RemoteRepositoryService {
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
-    public RemoteRepositoryService() {
-        this.objectMapper = new ObjectMapper();
+    public RemoteRepositoryService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(10))
@@ -40,9 +40,9 @@ public class RemoteRepositoryService {
 
     /**
      * Reaches to the remote repository for a list of available decks
-     * @return list of avaiable decks to download in form of {@link RepositoryDeck} objects
+     * @return list of available decks to download in form of {@link RepositoryDeck} objects
      */
-    public List<RepositoryDeck> fetchAvailabeDecks() throws IOException, InterruptedException {
+    public List<RepositoryDeck> fetchAvailableDecks() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(indexUrl))
                 .GET().build();

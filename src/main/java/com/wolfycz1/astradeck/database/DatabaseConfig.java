@@ -1,7 +1,6 @@
 package com.wolfycz1.astradeck.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.wolfycz1.astradeck.util.OsPaths;
 import org.flywaydb.core.Flyway;
 import org.jdbi.v3.core.Jdbi;
@@ -27,7 +26,7 @@ public class DatabaseConfig {
      * Configures Jdbi
      * @return configured Jdbi instance for database operations
      */
-    public static Jdbi initializeDatabase() {
+    public static Jdbi initializeDatabase(ObjectMapper objectMapper) {
         try {
             Files.createDirectories(OsPaths.DATA_DIR);
         } catch (IOException e) {
@@ -41,10 +40,7 @@ public class DatabaseConfig {
         jdbi.installPlugin(new SqlObjectPlugin());
         jdbi.installPlugin(new Jackson2Plugin());
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-
-        jdbi.getConfig(Jackson2Config.class).setMapper(mapper);
+        jdbi.getConfig(Jackson2Config.class).setMapper(objectMapper);
 
         return jdbi;
     }

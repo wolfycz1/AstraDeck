@@ -1,10 +1,6 @@
 package com.wolfycz1.astradeck.storage;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.wolfycz1.astradeck.model.Deck;
 import com.wolfycz1.astradeck.model.Manifest;
 import com.wolfycz1.astradeck.model.Media;
@@ -14,12 +10,12 @@ import com.wolfycz1.astradeck.storage.exceptions.MissingMediaException;
 import com.wolfycz1.astradeck.storage.exceptions.UnsupportedVersionException;
 import com.wolfycz1.astradeck.ui.util.ImageProvider;
 import com.wolfycz1.astradeck.util.Constants;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -29,26 +25,11 @@ import java.util.zip.ZipOutputStream;
  * @author wolfycz1
  */
 @Slf4j
+@RequiredArgsConstructor
 public class AstraArchiveHandler {
     private final ObjectMapper mapper;
     private final MediaStorageService mediaStorageService;
     private final ImageProvider imageProvider;
-
-    /**
-     * Sets up the JSON object mapper configuration and modules
-     */
-    public AstraArchiveHandler(MediaStorageService mediaStorageService, ImageProvider imageProvider) {
-        this.mapper = new ObjectMapper();
-        this.mapper.registerModule(new JavaTimeModule());
-        this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        this.mediaStorageService = mediaStorageService;
-        this.imageProvider = imageProvider;
-
-        this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        this.mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-    }
 
     /**
      * Unpacks a .astra deck file, validates its contents, extracts media and loads the deck in memory
@@ -88,15 +69,13 @@ public class AstraArchiveHandler {
             }
 
             try (InputStream is = zipFile.getInputStream(deckEntry)) {
-                mediaStorageService.extractMedia(filePath, manifest);
+                mediaStorageService.extractMedia(zipFile, manifest);
 
-                CompletableFuture.runAsync(() -> {
-                    log.info("Starting background image proxy preload");
-                    for (Media media : manifest.getMediaList()) {
-                        imageProvider.preloadIcon(media, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
-                    }
-                    log.info("Background image scale cached.");
-                });
+                log.info("Starting background image proxy preload");
+                for (Media media : manifest.getMediaList()) {
+                    imageProvider.preloadIcon(media, Constants.MAX_CARD_IMAGE_WIDTH, Constants.MAX_CARD_IMAGE_HEIGHT);
+                }
+                log.info("Background image scale tasks submitted.");
 
                 return mapper.readValue(is, Deck.class);
             }

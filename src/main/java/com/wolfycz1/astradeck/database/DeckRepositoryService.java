@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Serivce class handling database transactions
+ * Service class handling database transactions
  * @author wolfycz1
  */
 @RequiredArgsConstructor

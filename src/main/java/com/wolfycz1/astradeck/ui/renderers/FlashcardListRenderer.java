@@ -33,15 +33,15 @@ public class FlashcardListRenderer extends DefaultListCellRenderer {
     }
 
     /**
-     * Strips line breaks and cuts off long text so it fits the list
+     * Strips line breaks and HTML and cuts off long text so it fits the list
      * @param text text to truncate
-     * @return truncated text
+     * @return plain truncated text
      */
     private String truncate(String text) {
-        String truncated = text.trim().replace("\n", " ");
-        if (truncated.length() > 35) {
-            return truncated.substring(0, 32) + "...";
+        String plain = text.replaceAll("<[^>]*>", "").trim().replace("\n", " ");
+        if (plain.length() > 35) {
+            return plain.substring(0, 32) + "...";
         }
-        return truncated;
+        return plain;
     }
 }

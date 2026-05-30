@@ -16,7 +16,6 @@ import java.util.Optional;
  * Generates the visual UI panel for a flashcard that include an image alongside text
  * @author wolfycz1
  */
-@SuppressWarnings("DuplicatedCode")
 @RequiredArgsConstructor
 public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
     private final ImageProvider imageProvider;
@@ -47,8 +46,7 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
         textLabel.putClientProperty(FlatClientProperties.STYLE, "font: +8");
         Optional.ofNullable(card.getFront())
                 .map(ImageSide::getText)
-                .map(text -> "<html><center'>" +
-                        text.replace("\n", "<br>") + "</center></html>")
+                .map(this::formatCardText)
                 .ifPresent(textLabel::setText);
 
         JLabel imageLabel = new JLabel();
@@ -79,8 +77,7 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
         label.putClientProperty(FlatClientProperties.STYLE, "font: +4");
         Optional.ofNullable(card.getBack())
                 .map(TextSide::getText)
-                .map(text -> "<html><center>" +
-                        text.replace("\n", "<br>") + "</center></html>")
+                .map(this::formatCardText)
                 .ifPresent(label::setText);
         panel.add(label);
 

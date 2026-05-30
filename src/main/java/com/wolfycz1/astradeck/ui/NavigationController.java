@@ -7,6 +7,7 @@ import com.wolfycz1.astradeck.database.DeckRepositoryService;
 import com.wolfycz1.astradeck.event.*;
 import com.wolfycz1.astradeck.logic.StudySessionManager;
 import com.wolfycz1.astradeck.model.Deck;
+import com.wolfycz1.astradeck.network.RemoteRepositoryService;
 import com.wolfycz1.astradeck.storage.AstraArchiveHandler;
 import com.wolfycz1.astradeck.storage.MediaStorageService;
 import com.wolfycz1.astradeck.ui.editors.FlashcardEditor;
@@ -27,6 +28,7 @@ import java.util.List;
  */
 public class NavigationController {
     private final EventBus eventBus;
+    private final RemoteRepositoryService remoteRepositoryService;
     private final MainFrame mainFrame;
     private final MediaStorageService mediaStorageService;
     private final ImageProvider imageProvider;
@@ -38,13 +40,15 @@ public class NavigationController {
     private EditorPanel currentEditorPanel;
 
     public NavigationController(EventBus eventBus, MainFrame mainFrame, MediaStorageService mediaStorageService,
-                                ImageProvider imageProvider, AstraArchiveHandler astraArchiveHandler, DeckRepositoryService deckRepositoryService) {
+                                ImageProvider imageProvider, AstraArchiveHandler astraArchiveHandler,
+                                DeckRepositoryService deckRepositoryService, RemoteRepositoryService remoteRepositoryService) {
         this.eventBus = eventBus;
         this.mainFrame = mainFrame;
         this.mediaStorageService = mediaStorageService;
         this.imageProvider = imageProvider;
         this.astraArchiveHandler = astraArchiveHandler;
         this.deckRepositoryService = deckRepositoryService;
+        this.remoteRepositoryService = remoteRepositoryService;
 
         this.eventBus.register(this);
     }
@@ -54,14 +58,14 @@ public class NavigationController {
      */
     public void start() {
         List<Deck> savedDecks = deckRepositoryService.loadAllDecks();
-        this.dashboardPanel = new DashboardPanel(eventBus, astraArchiveHandler, savedDecks);
+        this.dashboardPanel = new DashboardPanel(eventBus, astraArchiveHandler, remoteRepositoryService, savedDecks);
         mainFrame.setView(MainFrame.VIEW_DASHBOARD, dashboardPanel);
         mainFrame.setVisible(true);
     }
 
     /**
      * Initializes a study manager and switches to a study view
-     * @param event deck to intialize a study manager for
+     * @param event deck to initialize a study manager for
      */
     @Subscribe
     public void onStudyRequest(RequestStudyEvent event) {

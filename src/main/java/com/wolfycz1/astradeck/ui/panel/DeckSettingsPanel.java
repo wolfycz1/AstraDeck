@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Panel providing a form for editting deck metadata
+ * Panel providing a form for editing deck metadata
  * @author wolfycz1
  */
 public class DeckSettingsPanel extends JPanel {
@@ -128,7 +128,15 @@ public class DeckSettingsPanel extends JPanel {
      * @param parentDialog dialog containing the form
      */
     private void saveSettings(JDialog parentDialog) {
-        deck.setTitle(titleField.getText().trim());
+        String newTitle = titleField.getText().trim();
+        if (newTitle.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Deck title cannot be empty.",
+                    "Invalid Input",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        deck.setTitle(newTitle);
         deck.setAuthor(authorField.getText().trim());
         deck.setDescription(descriptionArea.getText().trim());
 

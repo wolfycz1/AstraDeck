@@ -181,7 +181,7 @@ public class RepositoryPanel extends JPanel {
         }
 
         gridContainer.removeAll();
-        gridContainer.add(new JLabel("Loading avaiable decks..."));
+        gridContainer.add(new JLabel("Loading available decks..."));
         gridContainer.revalidate();
         gridContainer.repaint();
 
@@ -189,7 +189,7 @@ public class RepositoryPanel extends JPanel {
             @Override
             protected List<RepositoryDeck> doInBackground() {
                 try {
-                    return remoteRepositoryService.fetchAvailabeDecks();
+                    return remoteRepositoryService.fetchAvailableDecks();
                 } catch (Exception e) {
                     log.error("Error fetching available decks:", e);
                 }
@@ -262,8 +262,6 @@ public class RepositoryPanel extends JPanel {
 
             JLabel titleLabel = new JLabel(repositoryDeck.getTitle());
             titleLabel.putClientProperty(FlatClientProperties.STYLE, "font: bold +3");
-            Font currentFont = titleLabel.getFont();
-            titleLabel.setFont(currentFont.deriveFont(Font.BOLD,currentFont.getSize() + 3f));
             infoPanel.add(titleLabel);
             infoPanel.add(Box.createVerticalStrut(5));
 

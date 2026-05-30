@@ -139,7 +139,7 @@ public interface DeckDao {
     List<Deck> getAllDecks();
 
     /**
-     * Requests a stream of all flashcards of a deck from the database
+     * Requests a stream of all flashcards from the database
      * Must be closed. (Use: try-with-resources)
      * @return stream of flashcard objects
      */

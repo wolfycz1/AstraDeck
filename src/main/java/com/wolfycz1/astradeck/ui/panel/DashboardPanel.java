@@ -28,6 +28,7 @@ import java.util.List;
 @Slf4j
 public class DashboardPanel extends JPanel {
     private final EventBus eventBus;
+    private final RemoteRepositoryService remoteRepositoryService;
     private final AstraArchiveHandler astraArchiveHandler;
 
     private final List<Deck> loadedDecks = new ArrayList<>();
@@ -37,8 +38,10 @@ public class DashboardPanel extends JPanel {
     /**
      * Constructs the DashboardPanel, setting up the navigation bar and the deck grid
      */
-    public DashboardPanel(EventBus eventBus, AstraArchiveHandler astraArchiveHandler, List<Deck> initialDecks) {
+    public DashboardPanel(EventBus eventBus, AstraArchiveHandler astraArchiveHandler,
+                          RemoteRepositoryService remoteRepositoryService, List<Deck> initialDecks) {
         this.eventBus = eventBus;
+        this.remoteRepositoryService = remoteRepositoryService;
         this.astraArchiveHandler = astraArchiveHandler;
         this.loadedDecks.addAll(initialDecks);
 
@@ -163,9 +166,8 @@ public class DashboardPanel extends JPanel {
      * Handles displaying the discovery dialog
      */
     private void handleDiscovery() {
-        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Avaiable Decks", Dialog.ModalityType.APPLICATION_MODAL);
-        RemoteRepositoryService repositoryService = new RemoteRepositoryService();
-        RepositoryPanel repositoryPanel = new RepositoryPanel(eventBus, astraArchiveHandler, repositoryService, loadedDecks);
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Available Decks", Dialog.ModalityType.APPLICATION_MODAL);
+        RepositoryPanel repositoryPanel = new RepositoryPanel(eventBus, astraArchiveHandler, remoteRepositoryService, loadedDecks);
 
         dialog.setContentPane(repositoryPanel);
         dialog.setSize(800, 600);

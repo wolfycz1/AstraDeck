@@ -48,7 +48,7 @@ public class StudySessionManager {
         resetSession();
 
         for (ReviewState state : deck.getReviewData().values()) {
-            if (state.getNextReviewDate() == null || state.getNextReviewDate().isBefore(now)) {
+            if (state.getNextReviewDate() == null || !state.getNextReviewDate().isAfter(now)) {
                 dueCardsQueue.add(state);
             }
         }

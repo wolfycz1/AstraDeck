@@ -6,14 +6,14 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 /**
- * Implements the SM-2 space repetition alogorithm to calculate review intervals
- * @author woflycz1
+ * Implements the SM-2 space repetition algorithm to calculate review intervals
+ * @author wolfycz1
  */
 public class Sm2Algorithm implements ReviewAlgorithm {
     /**
      * Calculates the next review date, interval, ease-factor based on the SM-2 formula.
      * Modifies review state directly
-     * @param state current state of the item being review
+     * @param state current state of the item being reviewed
      * @param grade the grade given
      */
     @Override

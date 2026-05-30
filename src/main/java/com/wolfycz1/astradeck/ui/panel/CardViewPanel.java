@@ -23,7 +23,7 @@ public class CardViewPanel extends JPanel {
 
     /**
      * Constructs the panel, initializes the UI layout, and populates the renderer registry.
-     * @param renderers List of avaiable renderers
+     * @param renderers List of available renderers
      */
     public CardViewPanel(List<FlashcardRenderer<?>> renderers) {
         for (FlashcardRenderer<?> renderer : renderers) {
@@ -89,6 +89,11 @@ public class CardViewPanel extends JPanel {
 
         if (card != null) {
             var renderer = getRenderer(card);
+
+            if (renderer == null) {
+                frontContainer.add(new JLabel("Unsupported card type: " + card.getClass().getSimpleName()), BorderLayout.CENTER);
+                return;
+            }
 
             frontContainer.add(renderer.createFrontView(card), BorderLayout.CENTER);
             backContainer.add(renderer.createBackView(card), BorderLayout.CENTER);

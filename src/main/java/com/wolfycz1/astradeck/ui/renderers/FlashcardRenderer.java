@@ -18,4 +18,8 @@ public interface FlashcardRenderer<T extends Flashcard> {
 
     /** Builds the UI panel for the back side of the flashcard **/
     JPanel createBackView(T card);
+
+    default String formatCardText(String text) {
+        return "<html><center>" + text.replace("\n", "<br>") + "</center></html>";
+    }
 }

@@ -1,6 +1,8 @@
 package com.wolfycz1.astradeck.ui.util;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wolfycz1.astradeck.model.Media;
 import com.wolfycz1.astradeck.storage.MediaStorageService;
 import com.wolfycz1.astradeck.util.OsPaths;
@@ -12,9 +14,7 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Provider for cached scaled images for the UI
@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 public class ImageProvider {
     private final MediaStorageService mediaStorageService;
-    private final Map<String, ImageIcon> memoryCache;
+    private final Cache<String, ImageIcon> memoryCache;
     private final FlatSVGIcon missingIcon;
 
     /**
@@ -31,25 +31,27 @@ public class ImageProvider {
      */
     public ImageProvider(MediaStorageService mediaStorageService) {
         this.mediaStorageService = mediaStorageService;
-        this.memoryCache = Collections.synchronizedMap(
-                new LinkedHashMap<>(100, 0.75f, true) {
-                    @Override
-                    protected boolean removeEldestEntry(Map.Entry<String, ImageIcon> eldest) {
-                        return size() > 200;
-                    }
-                }
-        );
+
+        long maxCacheBytes = 100L * 1024L * 1024L;
+        this.memoryCache = Caffeine.newBuilder()
+                .maximumWeight(maxCacheBytes)
+                .weigher((String _, ImageIcon icon) -> {
+                    if (icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0) return 1;
+                    return icon.getIconWidth() * icon.getIconHeight() * 4;
+                })
+                .build();
+
         this.missingIcon = new FlatSVGIcon("icons/missing.svg");
     }
 
     /**
-     * Preloads a scaled icon to the cache
+     * Preloads a scaled icon to the cache asynchronously
      * @param media image to scale
      * @param maxWidth max width to scale it to
      * @param maxHeight max height to scale it to
      */
     public void preloadIcon(Media media, int maxWidth, int maxHeight) {
-        getIcon(media, maxWidth, maxHeight);
+        CompletableFuture.runAsync(() -> getIcon(media, maxWidth, maxHeight));
     }
 
     /**
@@ -62,7 +64,11 @@ public class ImageProvider {
      */
     public ImageIcon getIcon(Media media, int maxWidth, int maxHeight) {
         String cacheKey = media.name() + "_" + maxWidth + "x" + maxHeight;
-        return memoryCache.computeIfAbsent(cacheKey, key -> loadFromDiskOrGenerate(media, key, maxWidth, maxHeight));
+
+        return memoryCache.get(cacheKey, key -> {
+            ImageIcon icon = loadFromDiskOrGenerate(media, key, maxWidth, maxHeight);
+            return icon != null ? icon : missingIcon;
+        });
     }
 
     /**
@@ -75,11 +81,11 @@ public class ImageProvider {
      */
     private ImageIcon loadFromDiskOrGenerate(Media media, String key, int maxWidth, int maxHeight) {
         File pngCache = OsPaths.CACHE_DIR.resolve(key + ".png").toFile();
-        ImageIcon icon = attempDiskLoad(pngCache);
+        ImageIcon icon = attemptDiskLoad(pngCache);
         if (icon != null) return icon;
 
         File jpgCache = OsPaths.CACHE_DIR.resolve(key + ".jpg").toFile();
-        icon = attempDiskLoad(jpgCache);
+        icon = attemptDiskLoad(jpgCache);
         if (icon != null) return icon;
 
         return generateCacheProxy(media, key, maxWidth, maxHeight);
@@ -90,7 +96,7 @@ public class ImageProvider {
      * @param cacheFile file to attempt to load
      * @return the file, or {@code null} if it couldn't be loaded
      */
-    private ImageIcon attempDiskLoad(File cacheFile) {
+    private ImageIcon attemptDiskLoad(File cacheFile) {
         if (cacheFile.exists()) {
             try {
                 BufferedImage image = ImageIO.read(cacheFile);
@@ -114,12 +120,12 @@ public class ImageProvider {
         File original = mediaStorageService.getMediaFile(media);
         if (!original.exists()) {
             log.error("Original image missing from persistent storage: {}", original.getPath());
-            return missingIcon;
+            return null;
         }
 
         try {
             BufferedImage image = ImageIO.read(original);
-            if (image == null) return missingIcon;
+            if (image == null) return null;
 
             BufferedImage scaledImage;
             boolean hasTransparency = image.getColorModel().hasAlpha();
@@ -140,12 +146,12 @@ public class ImageProvider {
             return new ImageIcon(scaledImage);
         } catch (IOException e) {
             log.error("Failed to generate image proxy for: {}", original.getName(), e);
-            return missingIcon;
+            return null;
         }
     }
 
     /** Clears all stored images in memory **/
     public void clearMemoryCache() {
-        memoryCache.clear();
+        memoryCache.invalidateAll();
     }
 }

@@ -140,6 +140,7 @@ public class EditorPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(cardList);
         scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         sidebar.add(scrollPane, BorderLayout.CENTER);
 
         JButton addButton = new JButton("+ Add new card");

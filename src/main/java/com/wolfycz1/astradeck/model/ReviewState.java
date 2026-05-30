@@ -1,6 +1,7 @@
 package com.wolfycz1.astradeck.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -10,7 +11,9 @@ import java.util.UUID;
  * @author wolfycz1
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReviewState {
+    @EqualsAndHashCode.Include
     private UUID cardId;
     private Instant lastReviewDate;
     private Instant nextReviewDate = Instant.now();

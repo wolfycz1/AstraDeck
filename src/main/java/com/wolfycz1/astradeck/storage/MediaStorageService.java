@@ -56,23 +56,21 @@ public class MediaStorageService {
 
     /**
      * Saves media files from an import deck to local storage
-     * @param deckPath path to the deck
+     * @param zipFile open ZipFile containing media
      * @param manifest manifest of the deck
      */
-    public void extractMedia(Path deckPath, Manifest manifest) throws IOException {
+    public void extractMedia(ZipFile zipFile, Manifest manifest) throws IOException {
         log.info("Extracting media for deck: {}", manifest.getTitle());
-        try (ZipFile zipFile = new ZipFile(deckPath.toFile())) {
-            for (Media media : manifest.getMediaList()) {
-                File targetFile = getMediaFile(media);
-                if (!targetFile.exists()) {
-                    ZipEntry entry = zipFile.getEntry(media.getPath());
-                    if (entry != null) {
-                        try (InputStream is = zipFile.getInputStream(entry)) {
-                            FileUtils.copyInputStreamToFile(is, targetFile);
-                        }
-                    } else {
-                        log.warn("Media file {} listed in manifest but missing from archive", media.getPath());
+        for (Media media : manifest.getMediaList()) {
+            File targetFile = getMediaFile(media);
+            if (!targetFile.exists()) {
+                ZipEntry entry = zipFile.getEntry(media.getPath());
+                if (entry != null) {
+                    try (InputStream is = zipFile.getInputStream(entry)) {
+                        FileUtils.copyInputStreamToFile(is, targetFile);
                     }
+                } else {
+                    log.warn("Media file {} listed in manifest but missing from archive", media.getPath());
                 }
             }
         }
@@ -123,8 +121,7 @@ public class MediaStorageService {
                 digest.update(buffer, 0, bytesRead);
             }
         }
-        byte[] fileBytes = Files.readAllBytes(file.toPath());
-        return HexFormat.of().formatHex(digest.digest(fileBytes));
+        return HexFormat.of().formatHex(digest.digest());
     }
 
     /**

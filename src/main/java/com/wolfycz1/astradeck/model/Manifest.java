@@ -2,6 +2,7 @@ package com.wolfycz1.astradeck.model;
 
 import com.wolfycz1.astradeck.util.Constants;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,7 +14,9 @@ import java.util.UUID;
  * @author wolfycz1
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Manifest {
+    @EqualsAndHashCode.Include
     private UUID deckId;
     private int version = Constants.ASTRA_FORMAT_VERSION;
     private String minAppVersion = Constants.MAJOR_APP_VERSION;
