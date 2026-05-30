@@ -225,6 +225,7 @@ public class RepositoryPanel extends JPanel {
         gridContainer.removeAll();
 
         List<RepositoryDeck> filtered = allRepositoryDecks.stream()
+                .filter(deck -> !deck.isHidden())
                 .filter(deck -> query.isEmpty() || deck.getTitle().toLowerCase().contains(query) ||
                         (deck.getAuthor() != null && deck.getAuthor().toLowerCase().contains(query)) ||
                         (deck.getTags() != null && deck.getTags().stream().anyMatch(t -> t.toLowerCase().contains(query))))

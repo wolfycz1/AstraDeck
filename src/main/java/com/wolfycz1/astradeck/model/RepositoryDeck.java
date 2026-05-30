@@ -22,4 +22,5 @@ public class RepositoryDeck {
     private String description;
     private String url;
     private List<String> tags;
+    private boolean hidden;
 }
