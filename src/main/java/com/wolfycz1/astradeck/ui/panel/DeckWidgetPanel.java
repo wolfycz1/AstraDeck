@@ -100,8 +100,8 @@ public class DeckWidgetPanel extends JPanel {
 
         JMenuItem deleteItem = new JMenuItem("Delete");
         deleteItem.setFocusable(false);
-        deleteItem.putClientProperty(FlatClientProperties.STYLE, "background: #d32f2f;" +
-                "foreground: #ffffff; hoverBackground: #b71c1c; focusedBackground: #c62828");
+        deleteItem.putClientProperty(FlatClientProperties.STYLE, "background: #d32f2f; foreground: #ffffff;" +
+                "selectionBackground: #b71c1c");
         deleteItem.addActionListener(_ -> {
             Window parentWindow = SwingUtilities.getWindowAncestor(this);
             int confirm = JOptionPane.showConfirmDialog(parentWindow,

@@ -43,8 +43,13 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
 
         JLabel textLabel = new JLabel();
         textLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        textLabel.setHorizontalAlignment(SwingConstants.CENTER);
         textLabel.putClientProperty(FlatClientProperties.STYLE, "font: +8");
-        Optional.ofNullable(card.getFront()).map(ImageSide::getText).ifPresent(textLabel::setText);
+        Optional.ofNullable(card.getFront())
+                .map(ImageSide::getText)
+                .map(text -> "<html><center'>" +
+                        text.replace("\n", "<br>") + "</center></html>")
+                .ifPresent(textLabel::setText);
 
         JLabel imageLabel = new JLabel();
         imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -72,7 +77,11 @@ public class ImageCardRenderer implements FlashcardRenderer<ImageCard> {
         JLabel label = new JLabel();
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.putClientProperty(FlatClientProperties.STYLE, "font: +4");
-        Optional.ofNullable(card.getBack()).map(TextSide::getText).ifPresent(label::setText);
+        Optional.ofNullable(card.getBack())
+                .map(TextSide::getText)
+                .map(text -> "<html><center>" +
+                        text.replace("\n", "<br>") + "</center></html>")
+                .ifPresent(label::setText);
         panel.add(label);
 
         return panel;

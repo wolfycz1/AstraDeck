@@ -51,7 +51,7 @@ public class DashboardPanel extends JPanel {
         navigationBar.setBorder(BorderFactory.createEmptyBorder(15, 25, 15, 25));
 
         JLabel logoLabel = new JLabel("AstraDeck");
-        logoLabel.putClientProperty(FlatClientProperties.STYLE, "font: +10 bold" +
+        logoLabel.putClientProperty(FlatClientProperties.STYLE, "font: +10 bold;" +
                 "foreground: $Component.accentColor");
         navigationBar.add(logoLabel, BorderLayout.WEST);
 
@@ -133,8 +133,6 @@ public class DashboardPanel extends JPanel {
 
             try {
                 Deck importedDeck = astraArchiveHandler.importAstraArchive(selectedFile.toPath());
-                loadedDecks.add(importedDeck);
-                refreshGrid();
                 eventBus.post(new DeckImportedEvent(importedDeck));
                 log.info("Imported deck: {}", importedDeck.getTitle());
             } catch (UnsupportedVersionException e) {
@@ -303,7 +301,7 @@ public class DashboardPanel extends JPanel {
 
         if (loadedDecks.isEmpty()) {
             JLabel emptyLabel = new JLabel("No decks loaded.");
-            emptyLabel.putClientProperty(FlatClientProperties.STYLE, "font: +2 italic" +
+            emptyLabel.putClientProperty(FlatClientProperties.STYLE, "font: +2 italic;" +
                     "foreground: $Label.disabledForeground");
             gridContainer.add(emptyLabel);
         } else {

@@ -35,7 +35,11 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
         JLabel label = new JLabel();
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         label.putClientProperty(FlatClientProperties.STYLE, "font: +8");
-        Optional.ofNullable(card.getFront()).map(TextSide::getText).ifPresent(label::setText);
+        Optional.ofNullable(card.getFront())
+                .map(TextSide::getText)
+                .map(text -> "<html><center>" +
+                        text.replace("\n", "<br>") + "</center></html>")
+                .ifPresent(label::setText);
         panel.add(label);
 
         return panel;
@@ -54,7 +58,11 @@ public class TextCardRenderer implements FlashcardRenderer<TextCard> {
         JLabel label = new JLabel();
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         label.putClientProperty(FlatClientProperties.STYLE, "font: +4");
-        Optional.ofNullable(card.getBack()).map(TextSide::getText).ifPresent(label::setText);
+        Optional.ofNullable(card.getBack())
+                .map(TextSide::getText)
+                .map(text -> "<html><center>" +
+                        text.replace("\n", "<br>") + "</center></html>")
+                .ifPresent(label::setText);
         panel.add(label);
 
         return panel;

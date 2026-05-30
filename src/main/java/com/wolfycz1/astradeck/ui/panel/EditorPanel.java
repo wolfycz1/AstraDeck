@@ -182,7 +182,8 @@ public class EditorPanel extends JPanel {
 
         JButton deleteButton = new JButton("Delete Card");
         deleteButton.setFocusable(false);
-        deleteButton.putClientProperty(FlatClientProperties.STYLE, "background: #d32f2f; foreground: #ffffff; selectionBackground: #b71c1c");
+        deleteButton.putClientProperty(FlatClientProperties.STYLE, "background: #d32f2f; foreground: #ffffff;" +
+                "hoverBackground: #b71c1c; focusedBackground: #c62828");
         deleteButton.addActionListener(_ -> deleteSelectedCard());
         footer.add(deleteButton);
 
